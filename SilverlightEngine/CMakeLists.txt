@@ -1,0 +1,46 @@
+project(SilverlightEngine)
+
+file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
+    Source/*.cpp
+    Source/*.h
+)
+
+add_library(SilverlightEngine SHARED ${ENGINE_SOURCES})
+
+target_include_directories(SilverlightEngine
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/glfw/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/glm
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/vulkan/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/stb_image
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/tinygltf
+)
+
+if (MSVC)
+    target_compile_options(SilverlightEngine PRIVATE /MP)
+endif()
+
+target_compile_definitions(SilverlightEngine
+    PRIVATE SILVERLIGHT_EXPORTS
+)
+
+target_link_libraries(SilverlightEngine
+    vulkan-1
+    ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/glfw/lib/glfw3.lib
+)
+
+foreach(file IN LISTS ENGINE_SOURCES)
+    get_filename_component(dir "${file}" PATH)
+    file(RELATIVE_PATH rel_dir "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${dir}")
+    string(REPLACE "/" "\\" group "${rel_dir}")
+    source_group("${group}" FILES "${file}")
+endforeach()
+
+add_custom_command(TARGET SilverlightEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_SOURCE_DIR}/Sandbox/Binaries/$<CONFIG>/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SilverlightEngine>
+        ${CMAKE_SOURCE_DIR}/Sandbox/Binaries/$<CONFIG>/
+)
