@@ -27,7 +27,12 @@ namespace Silverlight
 		appInfo.applicationVersion = VK_MAKE_API_VERSION(1, 1, 2, 0);
 		appInfo.pEngineName = "None";
 		appInfo.engineVersion = VK_MAKE_API_VERSION(1, 1, 2, 0);
+
+#if defined(VK_API_VERSION_1_4)
 		appInfo.apiVersion = instanceVersion >= VK_API_VERSION_1_4 ? VK_API_VERSION_1_4 : VK_API_VERSION_1_3;
+#else
+		appInfo.apiVersion = VK_API_VERSION_1_3;
+#endif
 
 		VkInstanceCreateInfo instanceCreateInfo{};
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
