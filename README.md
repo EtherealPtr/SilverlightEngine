@@ -4,7 +4,7 @@
   <img src ="https://github.com/user-attachments/assets/59d3eefa-d47b-4818-ab9f-14efaa31aa9a" alt="image">
 </p>
 
-<p>**Silverlight** is a modern, high-performance C++20 and Vulkan-based 3D rendering engine designed for real-time graphics, game development, simulations, and interactive applications. Built from the ground up for efficiency and flexibility, it provides a powerful foundation for rendering with the Vulkan API.</p>
+<p><strong>Silverlight</strong> is a modern, high-performance C++20 and Vulkan-based 3D rendering engine designed for real-time graphics, game development, simulations, and interactive applications. Built from the ground up for efficiency and flexibility, it provides a powerful foundation for rendering with the Vulkan API.</p>
 
 <h2>Key Features</h2>
 <ul>
@@ -43,6 +43,6 @@ Silverlight has only been tested on Windows and may not be compatible with other
 </ul>
 
 <h1>Why Silverlight Engine?</h1>
-<p>Silverlight is built with modern rendering techniques in mind, focusing on **performance**, **flexibility**, and future **extensibility**. The engine uses modern C++20 to maximize performance and code security. Whether you're developing a game, simulation, a visualization tool, or simply want to explore modern C++ and Vulkan, Silverlight provides a solid base for that!</p>
+<p>Silverlight is built with modern rendering techniques in mind, focusing on performance, flexibility, and future extensibility. The engine uses modern C++20 to maximize performance and code security. Whether you're developing a game, simulation, a visualization tool, or simply want to explore modern C++ and Vulkan, Silverlight provides a solid base for that!</p>
 
 <p>Copyright (c) 2023-2025 Rony Hanna. All rights reserved.</p>
