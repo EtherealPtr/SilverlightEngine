@@ -8,14 +8,14 @@
 
 <h2>Key Features</h2>
 <ul>
-<li> Advanced Lighting System: Directional, point, and spotlights with customizable properties. </li>
-<li> Dynamic Shadows: Directional shadow mapping support for realistic lighting. </li>
-<li> Custom Model Loading: glTF/glb support with submesh-based materials. </li>
-<li> Primitive Shapes: Triangle, cube, and plane with custom textures and vertex coloring. </li>
-<li> Modern Vulkan Renderer: Efficient rendering pipeline for high-performance rendering. </li>
-<li> Logging System: Outputs to console and external log files. </li>
-<li> Camera System: Default first-person style movement. </li>
-<li> Input System: Keyboard and mouse input for interactive applications. </li>
+<li> Advanced Lighting System: Directional, point, and spotlights with customizable properties</li>
+<li> Dynamic Shadows: Directional shadow mapping support for realistic lighting</li>
+<li> Custom Model Loading: glTF/glb support with submesh-based materials</li>
+<li> Primitive Shapes: Triangle, cube, and plane with custom textures and vertex coloring</li>
+<li> Modern Vulkan Renderer: Efficient rendering pipeline for high-performance rendering</li>
+<li> Logging System: Outputs to console and external log files</li>
+<li> Camera System: Default first-person style movement</li>
+<li> Input System: Keyboard and mouse input for interactive applications</li>
 </ul>
 
 <h2>Recently Added Features</h2>
@@ -26,12 +26,12 @@
 </ul>
 
 <h1>Getting Started</h1>
-<p>To get started, make sure you have <strong>Visual Studio 2022</strong> installed. 
+<p>To get started, it's recommended that you have <strong>Visual Studio 2022</strong> installed. 
 Silverlight has only been tested on Windows and may not be compatible with other development environments at this time.
 <ul>
 <li>Clone the repository</li>
-<li>Run <code>Setup_Windows.bat</code> file found in the root directory, it will check for Vulkan SDK and generate the project files for you</li>
-<li>If the Vulkan SDK is missing, please install it from <a href="https://vulkan.lunarg.com/sdk/home" target="_blank">LunarG's website</a></li>
+<li>Run <code>Setup_Windows.bat</code> file found in the root directory, it will check for Vulkan SDK and generate the project files</li>
+<li>If the Vulkan SDK is missing, please install it from <a href="https://vulkan.lunarg.com/sdk/home" target="_blank" rel="noopener noreferrer">LunarG's website</a></li>
 </ul>
 
 <h1>Architecture Overview</h1>
