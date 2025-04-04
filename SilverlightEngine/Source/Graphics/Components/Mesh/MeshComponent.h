@@ -3,7 +3,7 @@
 #include "Foundation/Components/Component.h"
 #include "Foundation/DLLConfig.h"
 #include "Graphics/ShaderTypeEnum.h"
-#include <glm/glm.hpp>
+#include "Graphics/GLMConfig.h"
 #include <optional>
 
 namespace Silverlight

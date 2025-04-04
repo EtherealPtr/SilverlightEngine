@@ -1,5 +1,5 @@
 #include "TransformComponent.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include "Graphics/GLMConfig.h"
 
 namespace Silverlight
 {

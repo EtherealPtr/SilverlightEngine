@@ -5,8 +5,7 @@
 #include "Graphics/Components/Mesh/CustomMeshComponent.h"
 #include "Graphics/MeshData.h"
 #include "Graphics/Systems/MeshSystem.h"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "Graphics/GLMConfig.h"
 
 #define TINYGLTF_NO_STB_IMAGE
 #define TINYGLTF_NO_STB_IMAGE_WRITE

@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include "Foundation/Input/InputMapping.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include "GLMConfig.h"
 #include <algorithm>
 
 namespace Silverlight

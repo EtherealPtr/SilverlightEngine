@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Foundation/Platform.h"
-#include <glm/glm.hpp>
+#include "Graphics/GLMConfig.h"
 
 namespace Silverlight
 {

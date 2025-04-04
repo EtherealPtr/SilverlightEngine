@@ -1,7 +1,7 @@
 #include "VulkanSceneShadow.h"
 #include "Graphics/Vulkan/VulkanRenderContext.h"
 #include "Graphics/Systems/LightSystem.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include "Graphics/GLMConfig.h"
 #include <vulkan/vulkan_core.h>
 
 namespace Silverlight
