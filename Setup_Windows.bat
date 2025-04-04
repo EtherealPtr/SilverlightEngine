@@ -5,8 +5,7 @@ echo ---Setting up Silverlight---
 
 echo Checking for Vulkan SDK
 if not defined VULKAN_SDK (
-    echo ERROR: Vulkan SDK not found.
-    echo Please install it from https://vulkan.lunarg.com/sdk/home
+    echo ERROR: Vulkan SDK not found. Please install it from https://vulkan.lunarg.com/sdk/home
     pause
     exit /b 1
 )

@@ -8,7 +8,7 @@ set OUTPUT_DIR=%ROOT_DIR%\build\CompiledShaders
 set RUNTIME_DIR=%ROOT_DIR%\build\Binaries\Shaders
 
 echo.
-echo ----Compiling shaders----
+echo ---Compiling shaders---
 
 for /R "%SHADER_DIR%" %%f in (*.vert *.frag) do (
     set "SHADER=%%f"
@@ -38,5 +38,5 @@ for /R "%SHADER_DIR%" %%f in (*.vert *.frag) do (
     copy /Y "!SPV_OUT!" "%RUNTIME_DIR%" >nul
 )
 
-echo ----Compiling shaders complete----
+echo ---Compiling shaders complete---
 endlocal

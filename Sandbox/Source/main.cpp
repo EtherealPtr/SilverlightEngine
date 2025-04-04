@@ -1,6 +1,7 @@
 #include "ExampleScene.h"
 #include "ExampleDirectionalLight.h"
 #include "ExamplePointLight.h"
+#include "ExampleSpotLight.h"
 #include <array>
 #include <Silverlight.h>
 
@@ -10,9 +11,10 @@ namespace ExampleApp
 	{
 	public:
 		ExampleClientApp() :
-			m_DirectionalLight{ glm::vec3(-0.3f, -1.0f, -0.5f), glm::vec4(1.0f, 0.95f, 0.9f, 0.5f) },
+			m_DirectionalLight{ glm::vec3(-0.4f, -0.4f, -0.5f), glm::vec4(1.0f, 0.95f, 0.9f, 0.5f) },
 			m_Ground{ glm::vec3(0.0f), glm::vec3(1.0f), "Textures/ground.jpg" },
 			m_CustomModel{ "Models/monkey.glb", glm::vec3(0.0f, 1.0f, 0.0f) },
+			m_Spotlight{ glm::vec3(-4.0f, 3.0f, 4.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 10.0f) },
 			m_PointLights{ { { glm::vec3(-2.0f, 0.5f, -1.2f), glm::vec4(1.0f, 0.2f, 0.2f, 3.0f) },		// Red
 							 { glm::vec3(2.0f, 1.0f, 1.2f), glm::vec4(0.2f, 1.0f, 0.2f, 3.0f) },		// Green
 							 { glm::vec3(-2.0f, 0.5f, 1.2f), glm::vec4(0.2f, 0.2f, 1.0f, 3.0f) } } }	// Blue
@@ -29,6 +31,7 @@ namespace ExampleApp
 		ExampleDirectionalLight m_DirectionalLight;
 		ExampleQuad m_Ground;
 		ExampleCustomModel m_CustomModel;
+		ExampleSpotLight m_Spotlight;
 		std::array<ExamplePointLight, 3> m_PointLights;
 	};
 } 
