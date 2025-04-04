@@ -9,9 +9,9 @@ namespace Silverlight
 	public:
 		static void InitializePaths();
 
-		static const std::string& GetEngineAssetsPath() noexcept { return m_EngineResDirPath; }
-		static const std::string& GetUserAssetsPath() noexcept { return m_UserAssetsPath; }
-		static const std::string& GetGeneratedDirPath() noexcept { return m_GeneratedDirPath; }
+		static const std::string& GetEngineAssetsPath() noexcept { return m_EngineAssetsDirPath; }
+		static const std::string& GetUserAssetsPath() noexcept { return m_UserAssetsDirPath; }
+		static const std::string& GetGeneratedDirPath() noexcept { return m_EngineGeneratedDirPath; }
 
 		PathManager(const PathManager&) = delete;
 		PathManager& operator=(const PathManager&) = delete;
@@ -19,8 +19,8 @@ namespace Silverlight
 		PathManager& operator=(PathManager&&) = delete;
 
 	private:
-		static std::string m_EngineResDirPath;
-		static std::string m_UserAssetsPath;
-		static std::string m_GeneratedDirPath;
+		static std::string m_EngineAssetsDirPath;
+		static std::string m_UserAssetsDirPath;
+		static std::string m_EngineGeneratedDirPath;
 	};
 } // End of namespace
