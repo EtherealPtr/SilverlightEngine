@@ -35,7 +35,6 @@ for /R "%SHADER_DIR%" %%f in (*.vert *.frag) do (
         )
     )
 
-    REM Copy to runtime folder
     copy /Y "!SPV_OUT!" "%RUNTIME_DIR%" >nul
 )
 

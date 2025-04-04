@@ -29,9 +29,9 @@
 <p>To get started, it's recommended that you have <strong>Visual Studio 2022</strong> installed. 
 Silverlight has only been tested on Windows and may not be compatible with other development environments at this time.
 <ul>
-<li>Clone the repository</li>
+<li>Clone the repository <code>git clone git@github.com:EtherealPtr/SilverlightEngine.git</code></li>
 <li>Run <code>Setup_Windows.bat</code> file found in the root directory, it will check for Vulkan SDK and generate the project files</li>
-<li>If the Vulkan SDK is missing, please install it from <a href="https://vulkan.lunarg.com/sdk/home" target="_blank" rel="noopener noreferrer">LunarG's website</a></li>
+<li>If the Vulkan SDK is missing, please install it from <a href="https://vulkan.lunarg.com/sdk/home" target="_blank">LunarG's website</a></li>
 </ul>
 
 <h1>Architecture Overview</h1>
