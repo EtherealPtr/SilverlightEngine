@@ -8,7 +8,7 @@
 #include "Graphics/Vulkan/VulkanUniformBuffer.h"
 #include "Graphics/Vulkan/VulkanDescriptorSet.h"
 #include "Graphics/Vulkan/VulkanDescriptorSetWriters.h"
-#include <glm/glm.hpp>
+#include "Graphics/GLMConfig.h"
 #include <vector>
 
 namespace Silverlight

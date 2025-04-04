@@ -2,7 +2,7 @@
 
 #include "Foundation/DLLConfig.h"
 #include "Foundation/Components/Component.h"
-#include <glm/glm.hpp>
+#include "Graphics/GLMConfig.h"
 #include <glm/gtc/quaternion.hpp>
 
 namespace Silverlight

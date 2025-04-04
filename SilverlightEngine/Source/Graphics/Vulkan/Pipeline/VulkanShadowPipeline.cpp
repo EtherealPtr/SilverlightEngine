@@ -22,7 +22,7 @@ namespace Silverlight
 	{
 		SE_LOG(LogCategory::Trace, "[GRAPHICS PIPELINE]: Creating depth-only graphics pipeline");
 
-		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/Depth/depth.spv") };
+		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/depth.vert.spv") };
 
 		VkShaderModule vertexShaderModule = VulkanUtils::CreateShaderModule(m_Device, vertShaderBinary);
 

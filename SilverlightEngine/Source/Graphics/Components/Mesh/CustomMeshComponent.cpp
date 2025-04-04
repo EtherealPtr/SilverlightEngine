@@ -28,6 +28,6 @@ namespace Silverlight
 	const std::string CustomMeshComponent::GetModelPath() const
 	{
 		const std::string_view modelsFolder{ "Models/" };
-		return PathManager::GetEngineResDirPath() + modelsFolder.data() + m_ModelName;
+		return PathManager::GetUserAssetsPath() + modelsFolder.data() + m_ModelName;
 	}
 } // End of namespace

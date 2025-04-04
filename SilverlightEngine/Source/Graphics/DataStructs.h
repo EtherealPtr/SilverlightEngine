@@ -2,7 +2,7 @@
 
 #include "Foundation/Platform.h"
 #include "Components/Light/LightData.h"
-#include <glm/glm.hpp>
+#include "GLMConfig.h"
 
 namespace Silverlight
 {
