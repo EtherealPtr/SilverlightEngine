@@ -24,3 +24,4 @@ cmake .. -G "Visual Studio 17 2022" -A x64
 
 echo Starting Silverlight!
 start SilverlightEngine.sln
+pause

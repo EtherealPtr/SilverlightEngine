@@ -22,8 +22,8 @@ namespace Silverlight
 	{
 		SE_LOG(LogCategory::Trace, "[GRAPHICS PIPELINE]: Creating graphics pipeline");
 
-		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/Standard/standard_vert.spv") };
-		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/Standard/standard_frag.spv") };
+		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.vert.spv") };
+		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.frag.spv") };
 
 		VkShaderModule vertexShaderModule{ VulkanUtils::CreateShaderModule(m_Device, vertShaderBinary) };
 		VkShaderModule fragmentShaderModule{ VulkanUtils::CreateShaderModule(m_Device, fragShaderBinary) };

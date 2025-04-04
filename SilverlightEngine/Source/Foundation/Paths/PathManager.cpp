@@ -4,6 +4,7 @@
 namespace Silverlight
 {
 	std::string PathManager::m_EngineResDirPath{ "" };
+	std::string PathManager::m_UserAssetsPath{ "" };
 	std::string PathManager::m_GeneratedDirPath{ "" };
 
 	void PathManager::InitializePaths()
@@ -11,17 +12,35 @@ namespace Silverlight
 		const std::filesystem::path currentFilePath(__FILE__);
 		const std::filesystem::path currentFileDirectory = currentFilePath.parent_path();
 
-		// Traverse the directory tree upwards until we find the "Res" folder
-		for (std::filesystem::path directory = currentFileDirectory; !directory.empty(); directory = directory.parent_path())
+		for (std::filesystem::path dir = currentFileDirectory; !dir.empty(); dir = dir.parent_path())
 		{
-			for (const auto& entry : std::filesystem::directory_iterator(directory))
+			bool foundSandbox{ false };
+			bool foundEngine{ false };
+
+			for (const auto& entry : std::filesystem::directory_iterator(dir))
 			{
-				if (entry.is_directory() && entry.path().filename() == "Res")
+				if (!entry.is_directory())
 				{
-					m_GeneratedDirPath = entry.path().parent_path().generic_string() + "/Silverlight_Generated/";
-					m_EngineResDirPath = entry.path().generic_string() + '/';
-					return;
+					continue;
 				}
+
+				if (entry.path().filename() == "Sandbox")
+				{
+					foundSandbox = true;
+				}
+
+				if (entry.path().filename() == "SilverlightEngine")
+				{
+					foundEngine = true;
+				}
+			}
+
+			if (foundSandbox && foundEngine)
+			{
+				m_EngineResDirPath = (dir / "build" / "Binaries").generic_string() + "/";
+				m_UserAssetsPath = (dir / "Sandbox" / "Assets").generic_string() + "/";
+				m_GeneratedDirPath = (dir / "Silverlight_Generated").generic_string() + "/";
+				return;
 			}
 		}
 	}
