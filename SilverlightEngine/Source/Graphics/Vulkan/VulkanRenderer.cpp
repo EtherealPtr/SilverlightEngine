@@ -214,7 +214,7 @@ namespace Silverlight
 			vkCmdBindPipeline(_cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_ShadowScene.value().GetPipeline().Get());
 
 			// Bind descriptor set
-			auto currentDescriptorSet{ m_ShadowScene.value().GetDescriptorSet().at(_imgIndex).Get()};
+			auto currentDescriptorSet{ m_ShadowScene.value().GetDescriptorSet().at(_imgIndex).Get() };
 			vkCmdBindDescriptorSets(_cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_ShadowScene.value().GetPipeline().GetLayout(), 0, 1, &currentDescriptorSet, 0, nullptr);
 
 			// Push constants
