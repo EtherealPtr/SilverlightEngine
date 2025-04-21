@@ -7,12 +7,26 @@
 
 namespace Silverlight
 {
-	MeshSystem::MeshSystem(VulkanVertexBufferManager& _vertexBufferManager) :
+	MeshSystem::MeshSystem(VulkanVertexBufferManager& _vertexBufferManager) noexcept :
 		m_VertexBufferManager{ _vertexBufferManager },
-		m_CachedSubMeshes{},
+		m_CachedMeshes{},
 		m_VertexBufferIdToSubMeshes{},
 		m_TotalMeshCount{ 0 }
 	{}
+
+	uint32 MeshSystem::CreatePrimitiveMesh(const PrimitiveShapeEnum _shape)
+	{
+		PrimitiveMeshComponent meshComp{ _shape };
+		m_VertexBufferManager.CreateBasicShapeVertexBuffer(meshComp);
+		MeshData mesh{ meshComp.GetMeshData() };
+
+		mesh.SetMeshId(m_TotalMeshCount++);
+		const uint32 id{ mesh.GetMeshId() };
+
+		m_SpecialMeshes.emplace(mesh.GetMeshId(), std::move(mesh));
+
+		return id;
+	}
 
 	void MeshSystem::ProcessComponents(const Entity* const _entity)
 	{
@@ -70,7 +84,7 @@ namespace Silverlight
 		UpdateSubMeshCache();
 	}
 
-	const std::vector<MeshData>& MeshSystem::GetSubMeshes(const uint32 _bufferId) const
+	const std::vector<MeshData>& MeshSystem::GetSubMeshes(const uint32 _bufferId) const noexcept
 	{
 		static const std::vector<MeshData> empty{};
 
@@ -83,19 +97,24 @@ namespace Silverlight
 		return empty;
 	}
 
-	VulkanVertexBuffer* MeshSystem::GetVertexBuffer(const uint32 _bufferId)
+	VulkanVertexBuffer* MeshSystem::GetVertexBuffer(const uint32 _bufferId) noexcept
 	{
 		return m_VertexBufferManager.GetVertexBuffer(_bufferId);
 	}
 
+	const MeshData& MeshSystem::GetSpecialMesh(const uint32 _meshId) const
+	{
+		return m_SpecialMeshes.at(_meshId);
+	}
+
 	void MeshSystem::UpdateSubMeshCache()
 	{
-		m_CachedSubMeshes.clear();
+		m_CachedMeshes.clear();
 
 		for (const auto& mesh : m_VertexBufferIdToSubMeshes)
 		{
 			const auto& subMeshes{ mesh.second };
-			m_CachedSubMeshes.insert(m_CachedSubMeshes.end(), subMeshes.begin(), subMeshes.end());
+			m_CachedMeshes.insert(m_CachedMeshes.end(), subMeshes.begin(), subMeshes.end());
 		}
 	}
 } // End of namespace

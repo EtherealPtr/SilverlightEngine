@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Foundation/Paths/PathManager.h"
 #include "Foundation/Entity/Entity.h"
 #include "Components.h"
 
@@ -34,7 +35,7 @@ namespace ExampleApp
 
 			if (_texturePath)
 			{
-				meshComponent->SetTexture(_texturePath);
+				meshComponent->SetTexture(Silverlight::PathManager::GetUserAssetsPath() + _texturePath);
 			}
 			else
 			{
@@ -68,7 +69,7 @@ namespace ExampleApp
 
 			if (_texturePath)
 			{
-				meshComponent->SetTexture(_texturePath);
+				meshComponent->SetTexture(Silverlight::PathManager::GetUserAssetsPath() + _texturePath);
 			}
 			else
 			{

@@ -1,35 +1,35 @@
 #include "VulkanSceneShadow.h"
 #include "Graphics/Vulkan/VulkanRenderContext.h"
+#include "Graphics/Vulkan/Layout/VulkanDescriptorSetLayout.h"
 #include "Graphics/Systems/LightSystem.h"
 #include "Graphics/GLMConfig.h"
 #include <vulkan/vulkan_core.h>
 
 namespace Silverlight
 {
-	VulkanSceneShadow::VulkanSceneShadow(const VulkanRenderContext& _renderContext, const VkDescriptorPool& _descriptorPool, const uint32 _flags) :
+	VulkanSceneShadow::VulkanSceneShadow(const VulkanRenderContext& _renderContext, const VulkanDescriptorSetLayout& _setLayout, const VkDescriptorPool& _descriptorPool) :
 		m_Width{ 1024 },
 		m_Height{ 1024 },
-		m_DepthBuffer{ _renderContext.GetDevice(), m_Width, m_Height, _flags },
+		m_DepthBuffer{ _renderContext.GetDevice(), m_Width, m_Height, VK_IMAGE_USAGE_SAMPLED_BIT },
 		m_RenderPass{ _renderContext.GetDevice().GetLogicalDevice(), m_DepthBuffer.GetFormat() },
-		m_FramebufferShadow{ _renderContext.GetDevice().GetLogicalDevice(), m_RenderPass.Get(), VK_NULL_HANDLE, m_DepthBuffer.GetImageView(), m_Width, m_Height },
-		m_DescriptorSetLayout{ _renderContext.GetDevice().GetLogicalDevice() },
-		m_Pipeline{ _renderContext, m_DescriptorSetLayout.Get(), m_RenderPass.Get(), m_Width, m_Height },
-		m_LightSpaceMatrix{ glm::identity<glm::mat4>() },
-		m_DescriptorSetWriters{ 1, { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }
+		m_Pipeline{ _renderContext, _setLayout.Get(), m_RenderPass.Get(), m_Width, m_Height},
+		m_Framebuffer{ _renderContext.GetDevice().GetLogicalDevice(), m_RenderPass.Get(), VK_NULL_HANDLE, m_DepthBuffer.GetImageView(), m_Width, m_Height },
+		m_BufferDescriptorInfo{},
+		m_LightSpaceMatrix{ glm::identity<glm::mat4>() }
 	{
 		const size_t numOfSwapChainImages{ _renderContext.GetSwapchain().GetImageViews().size() };
 
-		m_LightSpaceUniformBuffers.reserve(numOfSwapChainImages);
 		m_DescriptorSets.reserve(numOfSwapChainImages);
+		m_LightSpaceUniformBuffers.reserve(numOfSwapChainImages);
 
 		for (size_t i = 0; i < numOfSwapChainImages; ++i)
 		{
-			m_DescriptorSets.emplace_back(_renderContext.GetDevice().GetLogicalDevice(), _descriptorPool, m_DescriptorSetLayout.Get());
 			m_LightSpaceUniformBuffers.emplace_back(_renderContext.GetDevice().GetLogicalDevice(), _renderContext.GetDevice().GetPhysicalDevice(), sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+			m_DescriptorSets.emplace_back(_renderContext.GetDevice().GetLogicalDevice(), _descriptorPool, _setLayout.Get());
 		}
 	}
 
-	void VulkanSceneShadow::UpdateLightSpaceUniformBuffers(const LightSystem& _lightSystem, const uint32 _imgIndex)
+	void VulkanSceneShadow::UpdateLightSpaceUniformBuffer(const LightSystem& _lightSystem, const uint32 _imgIndex)
 	{
 		auto directionalLightComponent{ _lightSystem.GetDirectionalLight() };
 		if (!directionalLightComponent.has_value()) return;
@@ -41,13 +41,19 @@ namespace Silverlight
 		m_LightSpaceMatrix = lightProjMatrix * lightViewMatrix;
 
 		m_LightSpaceUniformBuffers.at(_imgIndex).CopyData(&m_LightSpaceMatrix);
-		m_DescriptorSetWriters.at(0).SetBuffer(m_LightSpaceUniformBuffers.at(_imgIndex).GetBuffer(), m_LightSpaceUniformBuffers.at(_imgIndex).GetBufferSize());
-		m_DescriptorSets.at(_imgIndex).UpdateDescriptorSet(m_DescriptorSetWriters);
+
+		m_BufferDescriptorInfo.m_Binding = 5;
+		m_BufferDescriptorInfo.m_Buffer = m_LightSpaceUniformBuffers.at(_imgIndex).GetBuffer();
+		m_BufferDescriptorInfo.m_Size = m_LightSpaceUniformBuffers.at(_imgIndex).GetBufferSize();
+		m_BufferDescriptorInfo.m_Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+		auto& descriptorSet{ m_DescriptorSets.at(_imgIndex) };
+		descriptorSet.UpdateDescriptorSet(m_BufferDescriptorInfo);
 	}
 
 	void VulkanSceneShadow::RecreateResources(const uint32 _flags)
 	{
 		m_DepthBuffer.RecreateDepthBuffer(m_Width, m_Height, _flags);
-		m_FramebufferShadow.RecreateFramebuffer(m_Width, m_Height, VK_NULL_HANDLE, m_DepthBuffer.GetImageView());
+		m_Framebuffer.RecreateFramebuffer(m_Width, m_Height, VK_NULL_HANDLE, m_DepthBuffer.GetImageView());
 	}
 } // End of namespace

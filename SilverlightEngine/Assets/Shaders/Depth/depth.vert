@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 in_vertex_position; 
 
-layout (set = 0, binding = 0) uniform ShadowMapBuffer
+layout (set = 0, binding = 5) uniform ShadowMapBuffer
 {
 	mat4 lightSpaceMatrix;
 } u_ShadowMapData;

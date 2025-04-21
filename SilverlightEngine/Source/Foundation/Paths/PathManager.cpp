@@ -3,6 +3,7 @@
 
 namespace Silverlight
 {
+	std::string PathManager::m_RuntimeAssetsDirPath{ "" };
 	std::string PathManager::m_EngineAssetsDirPath{ "" };
 	std::string PathManager::m_UserAssetsDirPath{ "" };
 	std::string PathManager::m_EngineGeneratedDirPath{ "" };
@@ -37,9 +38,10 @@ namespace Silverlight
 
 			if (foundSandbox && foundEngine)
 			{
-				m_EngineAssetsDirPath = (dir / "build" / "Binaries").generic_string() + "/";
-				m_UserAssetsDirPath = (dir / "Sandbox" / "Assets").generic_string() + "/";
-				m_EngineGeneratedDirPath = (dir / "build" / "Silverlight_Generated").generic_string() + "/";
+				m_RuntimeAssetsDirPath = (dir / "build" / "Binaries").generic_string() + '/';
+				m_EngineAssetsDirPath = (dir / "SilverlightEngine" / "Assets").generic_string() + '/';
+				m_UserAssetsDirPath = (dir / "Sandbox" / "Assets").generic_string() + '/';
+				m_EngineGeneratedDirPath = (dir / "build" / "Silverlight_Generated").generic_string() + '/';
 				return;
 			}
 		}

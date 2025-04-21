@@ -9,8 +9,8 @@ typedef struct VkDescriptorSet_T* VkDescriptorSet;
 
 namespace Silverlight
 {
-	class VulkanDescriptorSetBufferWriter;
-	class VulkanDescriptorSetTextureWriter;
+	struct VulkanBufferDescriptorInfo;
+	struct VulkanTextureDescriptorInfo;
 
 	class VulkanDescriptorSet
 	{
@@ -18,8 +18,8 @@ namespace Silverlight
 		VulkanDescriptorSet(const VkDevice& _logicalDevice, const VkDescriptorPool& _descriptorPool, const VkDescriptorSetLayout& _descriptorLayout);
 		~VulkanDescriptorSet();
 
-		void UpdateDescriptorSet(const std::vector<VulkanDescriptorSetBufferWriter>& _descriptorSetBufferWriters) const noexcept;
-		void UpdateDescriptorSet(const std::vector<VulkanDescriptorSetTextureWriter>& _descriptorSetTextureWriters);
+		void UpdateDescriptorSet(const VulkanBufferDescriptorInfo& _bufferInfo) const noexcept;
+		void UpdateDescriptorSet(const VulkanTextureDescriptorInfo& _textureInfo) const noexcept;
 		const VkDescriptorSet& Get() const noexcept { return m_DescriptorSet; }
 
 	private:

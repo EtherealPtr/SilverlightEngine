@@ -1,4 +1,4 @@
-#include "VulkanTexture.h"
+#include "VulkanTextureManager.h"
 #include "VulkanUtils.h"
 #include "Foundation/ResourceManager/ResourceManager.h"
 #include "Foundation/Logging/Logger.h"
@@ -13,7 +13,7 @@ namespace Silverlight
 		m_ImageMemory{ VK_NULL_HANDLE }
 	{}
 
-	VulkanTexture::VulkanTexture(const VulkanDevice& _device, const VkCommandPool& _commandPool) :
+	VulkanTextureManager::VulkanTextureManager(const VulkanDevice& _device, const VkCommandPool& _commandPool) :
 		m_LogicalDevice{ _device.GetLogicalDevice() },
 		m_PhysicalDevice{ _device.GetPhysicalDevice() },
 		m_GraphicsQueue{ _device.GetGraphicsQueue() },
@@ -21,12 +21,13 @@ namespace Silverlight
 		m_TextureImageFormat{ VK_FORMAT_R8G8B8A8_SRGB },
 		m_TextureImages{},
 		m_TextureImageViews{},
-		m_DummyDepthImage{}
+		m_DummyDepthImage{},
+		m_CubemapImageView{}
 	{
 		UploadTextures();
 	}
 
-	VulkanTexture::~VulkanTexture()
+	VulkanTextureManager::~VulkanTextureManager()
 	{
 		if (m_DummyDepthImage.m_Image != VK_NULL_HANDLE)
 		{
@@ -43,7 +44,7 @@ namespace Silverlight
 		}
 	}
 
-	void VulkanTexture::UploadTextures()
+	void VulkanTextureManager::UploadTextures()
 	{
 		const std::vector<Image>& images{ g_ResourceManager.GetImages() };
 		m_TextureImages.reserve(images.size());
@@ -51,24 +52,129 @@ namespace Silverlight
 
 		for (const auto& image : images)
 		{
-			CreateStagingBuffer(image.m_ImageSize, image.m_Pixels, image.m_ImageWidth, image.m_ImageHeight);
+			VkBuffer stagingBuffer{ VK_NULL_HANDLE };
+			VkDeviceMemory stagingBufferMemory{ VK_NULL_HANDLE };
+
+			CreateStagingBuffer(image.m_ImageSize, image.m_Pixels, stagingBuffer, stagingBufferMemory);
+			CreateTextureImage(stagingBuffer, image.m_ImageWidth, image.m_ImageHeight);
+
+			vkFreeMemory(m_LogicalDevice, stagingBufferMemory, nullptr);
+			vkDestroyBuffer(m_LogicalDevice, stagingBuffer, nullptr);
+			stagingBufferMemory = VK_NULL_HANDLE;
+			stagingBuffer = VK_NULL_HANDLE;
 		}
 	}
 
-	const VkImageView& VulkanTexture::GetDummyDepthTexture()
+	void VulkanTextureManager::CreateCubemap(const std::array<std::string, 6>& _filePaths)
+	{
+		std::array<uint16, 6> skyboxImgIndices{};
+
+		for (size_t i = 0; i < skyboxImgIndices.size(); ++i)
+		{
+			const uint16 imageIndex{ g_ResourceManager.LoadImageResource(_filePaths[i]) };
+			skyboxImgIndices[i] = imageIndex;
+		}
+
+		const std::vector<Image>& images{ g_ResourceManager.GetImages() };
+
+		VkDeviceMemory cubemapImageMemory{ VK_NULL_HANDLE };
+
+		VulkanUtils::CreateImage
+		(
+			m_LogicalDevice,
+			m_PhysicalDevice,
+			images[skyboxImgIndices[0]].m_ImageWidth, images[skyboxImgIndices[0]].m_ImageHeight,
+			m_TextureImageFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VkImageUsageFlagBits(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			m_CubemapImage,
+			cubemapImageMemory, 
+			6,
+			VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+		);
+
+		VulkanUtils::TransitionImageLayout
+		(
+			m_LogicalDevice,
+			m_CommandPool,
+			m_GraphicsQueue,
+			m_CubemapImage,
+			m_TextureImageFormat,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			6
+		);
+
+		std::vector<VkBuffer> stagingBuffers{ 6 };
+		std::vector<VkDeviceMemory> stagingBufferMemories{ 6 };
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			uint16 imgIndex{ skyboxImgIndices[i] };
+			VkBuffer stagingBuffer{ VK_NULL_HANDLE };
+			VkDeviceMemory stagingBufferMemory{ VK_NULL_HANDLE };
+
+			CreateStagingBuffer(images[imgIndex].m_ImageSize, images[imgIndex].m_Pixels, stagingBuffer, stagingBufferMemory);
+
+			VulkanUtils::CopyBufferToImage
+			(
+				m_LogicalDevice,
+				m_CommandPool,
+				m_GraphicsQueue,
+				stagingBuffer,
+				m_CubemapImage,
+				images[skyboxImgIndices[0]].m_ImageWidth, 
+				images[skyboxImgIndices[0]].m_ImageHeight,
+				static_cast<uint32>(i)
+			);
+
+			vkFreeMemory(m_LogicalDevice, stagingBufferMemory, nullptr);
+			vkDestroyBuffer(m_LogicalDevice, stagingBuffer, nullptr);
+		}
+
+		VulkanUtils::TransitionImageLayout
+		(
+			m_LogicalDevice,
+			m_CommandPool,
+			m_GraphicsQueue,
+			m_CubemapImage,
+			m_TextureImageFormat,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			6
+		);
+
+		VulkanUtils::CreateImageView
+		(
+			m_LogicalDevice,
+			m_CubemapImage,
+			m_TextureImageFormat,
+			VK_IMAGE_ASPECT_COLOR_BIT,
+			m_CubemapImageView,
+			6,
+			VK_IMAGE_VIEW_TYPE_CUBE
+		);
+
+		m_TextureImages.emplace_back(m_CubemapImage, m_CubemapImageView, cubemapImageMemory);
+		m_TextureImageViews.emplace_back(m_CubemapImageView);
+		SE_LOG(LogCategory::Info, "[TEXTURE CUBE]: Created a cubemap (total textures: %d)", m_TextureImages.size());
+	}
+
+	const VkImageView& VulkanTextureManager::GetDummyDepthTexture()
 	{
 		if (m_DummyDepthImage.m_ImageView != VK_NULL_HANDLE)
 		{
 			return m_DummyDepthImage.m_ImageView;
 		}
 
-		const auto format = VulkanUtils::FindSupportedFormat
+		const auto format{ VulkanUtils::FindSupportedFormat
 		(
 			m_PhysicalDevice,
 			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
+		) };
 
 		const VkImageUsageFlagBits usageFlags
 		{
@@ -111,11 +217,8 @@ namespace Silverlight
 		return m_DummyDepthImage.m_ImageView;
 	}
 
-	void VulkanTexture::CreateStagingBuffer(const uint64 _sizeOfBuffer, const unsigned char* _pixels, const uint32 _imgW, const uint32 _imgH)
+	void VulkanTextureManager::CreateStagingBuffer(const uint64 _sizeOfBuffer, const unsigned char* _pixels, VkBuffer& _buffer, VkDeviceMemory& _bufferMemory) const
 	{
-		VkBuffer stagingBuffer{};
-		VkDeviceMemory stagingBufferMemory{};
-
 		VulkanUtils::CreateBuffer
 		(
 			m_LogicalDevice,
@@ -123,24 +226,17 @@ namespace Silverlight
 			_sizeOfBuffer,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory
+			_buffer,
+			_bufferMemory
 		);
 
-		void* data = nullptr;
-		vkMapMemory(m_LogicalDevice, stagingBufferMemory, 0, _sizeOfBuffer, 0, &data);
+		void* data{ nullptr };
+		vkMapMemory(m_LogicalDevice, _bufferMemory, 0, _sizeOfBuffer, 0, &data);
 		memcpy(data, _pixels, _sizeOfBuffer);
-		vkUnmapMemory(m_LogicalDevice, stagingBufferMemory);
-
-		CreateTextureImage(stagingBuffer, _imgW, _imgH);
-
-		vkFreeMemory(m_LogicalDevice, stagingBufferMemory, nullptr);
-		vkDestroyBuffer(m_LogicalDevice, stagingBuffer, nullptr);
-		stagingBufferMemory = VK_NULL_HANDLE;
-		stagingBuffer = VK_NULL_HANDLE;
+		vkUnmapMemory(m_LogicalDevice, _bufferMemory);
 	}
 
-	void VulkanTexture::CreateTextureImage(const VkBuffer& _buffer, const uint32 _imgW, const uint32 _imgH)
+	void VulkanTextureManager::CreateTextureImage(const VkBuffer& _buffer, const uint32 _imgW, const uint32 _imgH)
 	{
 		VkImage textureImage{};
 		VkImageView textureImageView{};
@@ -160,7 +256,6 @@ namespace Silverlight
 			textureImageMemory
 		);
 
-		// Transition image layout to read pixels from VkBuffer
 		VulkanUtils::TransitionImageLayout
 		(
 			m_LogicalDevice,
@@ -172,7 +267,6 @@ namespace Silverlight
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
 
-		// Copy the pixels in VkBuffer to the image
 		VulkanUtils::CopyBufferToImage
 		(
 			m_LogicalDevice,
@@ -184,7 +278,6 @@ namespace Silverlight
 			_imgH
 		);
 
-		// Transition image layout so that it can be sampled in the shader
 		VulkanUtils::TransitionImageLayout
 		(
 			m_LogicalDevice,
