@@ -3,6 +3,7 @@
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 typedef struct VkDevice_T* VkDevice;
 typedef struct VkSampler_T* VkSampler;
+typedef enum VkSamplerAddressMode VkSamplerAddressMode;
 
 namespace Silverlight
 {
@@ -11,7 +12,7 @@ namespace Silverlight
 	class VulkanTextureSampler
 	{
 	public:
-		VulkanTextureSampler(const VulkanDevice& _device);
+		VulkanTextureSampler(const VulkanDevice& _device, const VkSamplerAddressMode _samplerAddressMode);
 		~VulkanTextureSampler();
 
 		VulkanTextureSampler(const VulkanTextureSampler&) = delete;

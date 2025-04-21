@@ -18,7 +18,7 @@ namespace Silverlight
 			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 16 },
 			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_SAMPLER, 1 },
 			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
+			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2 }
 		};
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};

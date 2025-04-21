@@ -5,7 +5,7 @@
 
 namespace Silverlight
 {
-	VulkanTextureSampler::VulkanTextureSampler(const VulkanDevice& _device) :
+	VulkanTextureSampler::VulkanTextureSampler(const VulkanDevice& _device, const VkSamplerAddressMode _samplerAddressMode) :
 		m_LogicalDevice{ _device.GetLogicalDevice() },
 		m_PhysicalDevice{ _device.GetPhysicalDevice() },
 		m_TextureSampler{ VK_NULL_HANDLE }
@@ -16,9 +16,9 @@ namespace Silverlight
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
 		samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeU = _samplerAddressMode;
+		samplerCreateInfo.addressModeV = _samplerAddressMode;
+		samplerCreateInfo.addressModeW = _samplerAddressMode;
 		samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerCreateInfo.compareEnable = VK_FALSE;
 		samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;

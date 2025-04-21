@@ -1,5 +1,5 @@
 #include "VulkanDescriptorSet.h"
-#include "VulkanDescriptorSetWriters.h"
+#include "VulkanDescriptorInfo.h"
 #include "Foundation/Logging/Logger.h"
 #include <vulkan/vulkan_core.h>
 
@@ -18,7 +18,7 @@ namespace Silverlight
 
 		if (vkAllocateDescriptorSets(_logicalDevice, &allocInfo, &m_DescriptorSet) != VK_SUCCESS)
 		{
-			SE_LOG(LogCategory::Warning, "[DESCRIPTOR SET]: Failed to allocate descriptor sets");
+			SE_LOG(LogCategory::Warning, "[DESCRIPTOR SET]: Failed to allocate a descriptor set");
 		}
 	}
 
@@ -27,58 +27,77 @@ namespace Silverlight
 		vkFreeDescriptorSets(m_LogicalDevice, m_DescriptorPool, 1, &m_DescriptorSet);
 	}
 
-	void VulkanDescriptorSet::UpdateDescriptorSet(const std::vector<VulkanDescriptorSetBufferWriter>& _descriptorSetBufferWriters) const noexcept
+	void VulkanDescriptorSet::UpdateDescriptorSet(const VulkanBufferDescriptorInfo& _bufferInfo) const noexcept
 	{
-		for (const auto& writer : _descriptorSetBufferWriters)
-		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.offset = 0;
-			bufferInfo.buffer = writer.GetBuffer();
-			bufferInfo.range = writer.GetBufferRange();
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.offset = 0;
+		bufferInfo.buffer = _bufferInfo.m_Buffer;
+		bufferInfo.range = _bufferInfo.m_Size;
 
-			VkWriteDescriptorSet descriptorSetWriter{};
-			descriptorSetWriter.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorSetWriter.dstSet = m_DescriptorSet;
-			descriptorSetWriter.dstBinding = writer.GetBinding();
-			descriptorSetWriter.descriptorCount = 1;
-			descriptorSetWriter.descriptorType = writer.GetDescriptorType();
-			descriptorSetWriter.pBufferInfo = &bufferInfo;
-			descriptorSetWriter.pImageInfo = nullptr;
+		VkWriteDescriptorSet setWriter{};
+		setWriter.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		setWriter.dstSet = m_DescriptorSet;
+		setWriter.dstBinding = _bufferInfo.m_Binding;
+		setWriter.descriptorCount = 1;
+		setWriter.descriptorType = _bufferInfo.m_Type;
+		setWriter.pBufferInfo = &bufferInfo;
+		setWriter.pImageInfo = nullptr;
 
-			vkUpdateDescriptorSets(m_LogicalDevice, 1, &descriptorSetWriter, 0, nullptr);
-		}
+		vkUpdateDescriptorSets(m_LogicalDevice, 1, &setWriter, 0, nullptr);
 	}
 
-	void VulkanDescriptorSet::UpdateDescriptorSet(const std::vector<VulkanDescriptorSetTextureWriter>& _descriptorSetTextureWriters)
+	void VulkanDescriptorSet::UpdateDescriptorSet(const VulkanTextureDescriptorInfo& _textureInfo) const noexcept
 	{
-		for (const auto& writer : _descriptorSetTextureWriters)
+		VkWriteDescriptorSet setWriter{};
+		setWriter.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		setWriter.dstSet = m_DescriptorSet;
+		setWriter.dstBinding = _textureInfo.m_Binding;
+		setWriter.descriptorType = _textureInfo.m_Type;
+
+		std::vector<VkDescriptorImageInfo> imageInfos{};
+		VkDescriptorImageInfo samplerInfo{};
+
+		if (_textureInfo.m_Type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 		{
-			const VkImageLayout imageLayout{ (writer.GetDescriptorType() == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+			imageInfos.reserve(_textureInfo.m_ImageViews.size());
 
-			std::vector<VkDescriptorImageInfo> imageInfos{};
-			imageInfos.reserve(writer.GetImageViews().size());
-
-			if (writer.GetImageViews().empty())
+			for (const VkImageView& imgView : _textureInfo.m_ImageViews)
 			{
-				imageInfos.emplace_back(writer.GetSampler(), VK_NULL_HANDLE, imageLayout);
-			}
-			else
-			{
-				for (const auto& imageView : writer.GetImageViews())
-				{
-					imageInfos.emplace_back(writer.GetDescriptorType() == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER ? writer.GetSampler() : VK_NULL_HANDLE, imageView, imageLayout);
-				}
+				VkDescriptorImageInfo imgDescriptor{};
+				imgDescriptor.imageLayout = _textureInfo.m_ImageLayout;
+				imgDescriptor.imageView = imgView;
+				imgDescriptor.sampler = _textureInfo.m_Sampler;
+				imageInfos.emplace_back(imgDescriptor);
 			}
 
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSet;
-			descriptorWrite.dstBinding = writer.GetBinding();
-			descriptorWrite.descriptorCount = static_cast<uint32>(imageInfos.size());
-			descriptorWrite.descriptorType = writer.GetDescriptorType();
-			descriptorWrite.pImageInfo = imageInfos.data();
-
-			vkUpdateDescriptorSets(m_LogicalDevice, 1, &descriptorWrite, 0, nullptr);
+			setWriter.descriptorCount = static_cast<uint32>(_textureInfo.m_ImageViews.size());
+			setWriter.pImageInfo = imageInfos.data();
 		}
+		else if (_textureInfo.m_Type == VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
+		{
+			imageInfos.reserve(_textureInfo.m_ImageViews.size());
+
+			for (const VkImageView& imgView : _textureInfo.m_ImageViews)
+			{
+				VkDescriptorImageInfo imgDescriptor{};
+				imgDescriptor.imageLayout = _textureInfo.m_ImageLayout;
+				imgDescriptor.imageView = imgView;
+				imgDescriptor.sampler = VK_NULL_HANDLE;
+				imageInfos.emplace_back(imgDescriptor);
+			}
+
+			setWriter.descriptorCount = static_cast<uint32>(_textureInfo.m_ImageViews.size());
+			setWriter.pImageInfo = imageInfos.data();
+		}
+		else
+		{
+			samplerInfo.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			samplerInfo.imageView = VK_NULL_HANDLE;
+			samplerInfo.sampler = _textureInfo.m_Sampler;
+			setWriter.descriptorCount = 1;
+			setWriter.pImageInfo = &samplerInfo;
+		}
+
+		vkUpdateDescriptorSets(m_LogicalDevice, 1, &setWriter, 0, nullptr);
 	}
 } // End of namespace

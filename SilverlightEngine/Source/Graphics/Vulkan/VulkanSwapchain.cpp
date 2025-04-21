@@ -8,13 +8,11 @@ namespace Silverlight
 {
 	static VkSurfaceFormatKHR PickSurfaceFormat(const VkPhysicalDevice& _gpu, const VkSurfaceKHR& _surface)
 	{
-		// Query available surface formats
 		uint32 formatCount{ 0 };
 		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpu, _surface, &formatCount, nullptr);
 		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
 		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpu, _surface, &formatCount, surfaceFormats.data());
 
-		// Pick surface format
 		for (const auto& surfaceFormat : surfaceFormats)
 		{
 			if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
@@ -30,13 +28,11 @@ namespace Silverlight
 
 	static VkPresentModeKHR PickPresentMode(const VkPhysicalDevice& _gpu, const VkSurfaceKHR& _surface)
 	{
-		// Query available present modes
 		uint32 presentModeCount{ 0 };
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpu, _surface, &presentModeCount, nullptr);
 		std::vector<VkPresentModeKHR> presentModes(presentModeCount);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpu, _surface, &presentModeCount, presentModes.data());
 
-		// Pick present mode
 		for (const auto& presentMode : presentModes)
 		{
 			if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -47,8 +43,6 @@ namespace Silverlight
 		}
 
 		SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Selected default presentation mode");
-
-		// If mailbox present mode is not available, choose FIFO
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
@@ -63,7 +57,6 @@ namespace Silverlight
 			return extent;
 		}
 
-		// Otherwise, use the surface extent
 		return _surfaceCapabilities.currentExtent;
 	}
 
@@ -121,26 +114,20 @@ namespace Silverlight
 	{
 		SE_LOG(LogCategory::Trace, "[SWAPCHAIN]: Creating Vulkan Swapchain");
 
-		// Query surface capabilities
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_GPU, m_Surface, &surfaceCapabilities);
 
-		// Pick swapchain surface format and color space
 		const VkSurfaceFormatKHR surfaceFormat{ PickSurfaceFormat(m_GPU, m_Surface) };
 		m_Format = surfaceFormat.format;
 
-		// Pick swapchain present mode
 		const VkPresentModeKHR presentMode{ PickPresentMode(m_GPU, m_Surface) };
 
-		// Pick swapchain extent
 		const VkExtent2D extent{ PickExtent(surfaceCapabilities, _w, _h) };
 		m_Width = extent.width;
 		m_Height = extent.height;
 
-		// Determine number of images in the swapchain
 		uint32 imageCount{ PickImageCount(surfaceCapabilities) };
 
-		// Create swapchain
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.surface = m_Surface;
@@ -160,12 +147,10 @@ namespace Silverlight
 			throw std::runtime_error("ERROR: Failed to create Vulkan swapchain\n");
 		}
 
-		// Retrieve swapchain images
 		vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &imageCount, nullptr);
 		m_SwapchainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &imageCount, m_SwapchainImages.data());
 
-		// Create image views for the swapchain images
 		m_SwapchainImageViews.resize(imageCount);
 
 		for (uint32 i = 0; i < imageCount; ++i)

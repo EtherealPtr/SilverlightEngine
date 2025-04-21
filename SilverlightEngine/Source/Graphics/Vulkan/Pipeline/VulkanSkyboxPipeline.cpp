@@ -1,4 +1,4 @@
-#include "VulkanGraphicsPipeline.h"
+#include "VulkanSkyboxPipeline.h"
 #include "Graphics/Vulkan/VulkanRenderContext.h"
 #include "Graphics/Vulkan/VulkanUtils.h"
 #include "Foundation/ResourceManager/ResourceManager.h"
@@ -10,7 +10,7 @@
 
 namespace Silverlight
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanRenderContext& _renderContext, const VkDescriptorSetLayout& _descriptorSetLayout, const VkRenderPass& _renderPass) :
+	VulkanSkyboxPipeline::VulkanSkyboxPipeline(const VulkanRenderContext& _renderContext, const VkDescriptorSetLayout& _descriptorSetLayout, const VkRenderPass& _renderPass) :
 		VulkanPipelineBase{ _renderContext, _descriptorSetLayout, _renderPass },
 		m_Width{ _renderContext.GetSwapchain().GetWidth() },
 		m_Height{ _renderContext.GetSwapchain().GetHeight() }
@@ -18,12 +18,12 @@ namespace Silverlight
 		CreatePipeline();
 	}
 
-	void VulkanGraphicsPipeline::CreatePipeline()
+	void VulkanSkyboxPipeline::CreatePipeline()
 	{
-		SE_LOG(LogCategory::Trace, "[GRAPHICS PIPELINE]: Creating default graphics pipeline");
+		SE_LOG(LogCategory::Trace, "[SKYBOX PIPELINE]: Creating skybox graphics pipeline");
 
-		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.vert.spv") };
-		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.frag.spv") };
+		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/skybox.vert.spv") };
+		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/skybox.frag.spv") };
 
 		VkShaderModule vertexShaderModule{ VulkanUtils::CreateShaderModule(m_Device, vertShaderBinary) };
 		VkShaderModule fragmentShaderModule{ VulkanUtils::CreateShaderModule(m_Device, fragShaderBinary) };
@@ -49,21 +49,11 @@ namespace Silverlight
 		inputBindingDescription.stride = sizeof(Vertex);
 		inputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-		std::array<VkVertexInputAttributeDescription, 3> inputAttributeDescriptions{};
+		std::array<VkVertexInputAttributeDescription, 1> inputAttributeDescriptions{};
 		inputAttributeDescriptions.at(0).binding = 0;
 		inputAttributeDescriptions.at(0).location = 0;
 		inputAttributeDescriptions.at(0).format = VK_FORMAT_R32G32B32_SFLOAT;
 		inputAttributeDescriptions.at(0).offset = 0;
-
-		inputAttributeDescriptions.at(1).binding = 0;
-		inputAttributeDescriptions.at(1).location = 1;
-		inputAttributeDescriptions.at(1).format = VK_FORMAT_R32G32_SFLOAT;
-		inputAttributeDescriptions.at(1).offset = offsetof(Vertex, m_TexCoord);
-
-		inputAttributeDescriptions.at(2).binding = 0;
-		inputAttributeDescriptions.at(2).location = 2;
-		inputAttributeDescriptions.at(2).format = VK_FORMAT_R32G32B32_SFLOAT;
-		inputAttributeDescriptions.at(2).offset = offsetof(Vertex, m_Normal);
 
 		VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo{};
 		vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -117,7 +107,7 @@ namespace Silverlight
 		rasterizerStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 		rasterizerStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizerStateCreateInfo.lineWidth = 1.0f;
-		rasterizerStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizerStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
 		rasterizerStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizerStateCreateInfo.depthBiasEnable = VK_FALSE;
 		rasterizerStateCreateInfo.depthBiasConstantFactor = 0.0f;
@@ -137,7 +127,7 @@ namespace Silverlight
 		// Color blending stage
 		VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
 		colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachmentState.blendEnable = VK_TRUE;
+		colorBlendAttachmentState.blendEnable = VK_FALSE;
 		colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
@@ -155,8 +145,8 @@ namespace Silverlight
 		VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo{};
 		depthStencilCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		depthStencilCreateInfo.depthTestEnable = VK_TRUE;
-		depthStencilCreateInfo.depthWriteEnable = VK_TRUE;
-		depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilCreateInfo.depthWriteEnable = VK_FALSE;
+		depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 		depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
 		depthStencilCreateInfo.minDepthBounds = 0.0f;
 		depthStencilCreateInfo.maxDepthBounds = 1.0f;
@@ -164,17 +154,11 @@ namespace Silverlight
 		depthStencilCreateInfo.front = {};
 		depthStencilCreateInfo.back = {};
 
-		// Define push constant
-		VkPushConstantRange pushConstantRange{};
-		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(PushConstant);
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
 		// Pipeline layout stage
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+		pipelineLayoutCreateInfo.pPushConstantRanges = VK_NULL_HANDLE;
 		pipelineLayoutCreateInfo.setLayoutCount = 1;
 		pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
 
@@ -183,32 +167,32 @@ namespace Silverlight
 			throw std::runtime_error("ERROR: Failed to create a pipeline layout");
 		}
 
-		VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
-		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		graphicsPipelineCreateInfo.stageCount = 2;
-		graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos;
-		graphicsPipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
-		graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
-		graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-		graphicsPipelineCreateInfo.pRasterizationState = &rasterizerStateCreateInfo;
-		graphicsPipelineCreateInfo.pMultisampleState = &multisamplingStateCreateInfo;
-		graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilCreateInfo;
-		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
-		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-		graphicsPipelineCreateInfo.layout = m_PipelineLayout;
-		graphicsPipelineCreateInfo.renderPass = m_RenderPass;
-		graphicsPipelineCreateInfo.subpass = 0;
-		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-		graphicsPipelineCreateInfo.basePipelineIndex = -1;
+		VkGraphicsPipelineCreateInfo skyboxPipelineCreateInfo{};
+		skyboxPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		skyboxPipelineCreateInfo.stageCount = 2;
+		skyboxPipelineCreateInfo.pStages = shaderStageCreateInfos;
+		skyboxPipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
+		skyboxPipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
+		skyboxPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+		skyboxPipelineCreateInfo.pRasterizationState = &rasterizerStateCreateInfo;
+		skyboxPipelineCreateInfo.pMultisampleState = &multisamplingStateCreateInfo;
+		skyboxPipelineCreateInfo.pDepthStencilState = &depthStencilCreateInfo;
+		skyboxPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
+		skyboxPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+		skyboxPipelineCreateInfo.layout = m_PipelineLayout;
+		skyboxPipelineCreateInfo.renderPass = m_RenderPass;
+		skyboxPipelineCreateInfo.subpass = 0;
+		skyboxPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+		skyboxPipelineCreateInfo.basePipelineIndex = -1;
 
-		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &skyboxPipelineCreateInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
 		{
-			throw std::runtime_error("ERROR: Failed to create a graphics pipeline");
+			throw std::runtime_error("ERROR: Failed to create a skybox graphics pipeline");
 		}
 
 		vkDestroyShaderModule(m_Device, vertexShaderModule, nullptr);
 		vkDestroyShaderModule(m_Device, fragmentShaderModule, nullptr);
 
-		SE_LOG(LogCategory::Info, "[GRAPHICS PIPELINE]: Created graphics pipeline");
+		SE_LOG(LogCategory::Info, "[SKYBOX PIPELINE]: Created skybox graphics pipeline");
 	}
 } // End of namespace

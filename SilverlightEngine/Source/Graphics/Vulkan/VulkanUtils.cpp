@@ -92,12 +92,12 @@ namespace Silverlight
 		return shaderModule;
 	}
 
-	void VulkanUtils::CreateImageView(const VkDevice& _logicalDevice, const VkImage& _image, const uint32 _format, const uint32 _aspect, VkImageView& _imageView)
+	void VulkanUtils::CreateImageView(const VkDevice& _logicalDevice, const VkImage& _image, const uint32 _format, const uint32 _aspect, VkImageView& _imageView, const uint32 _layerCount, const uint32 _imageViewType)
 	{
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.image = _image;
-		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewCreateInfo.viewType = static_cast<VkImageViewType>(_imageViewType);
 		imageViewCreateInfo.format = static_cast<VkFormat>(_format);
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_R;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_G;
@@ -107,7 +107,7 @@ namespace Silverlight
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = 1;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-		imageViewCreateInfo.subresourceRange.layerCount = 1;
+		imageViewCreateInfo.subresourceRange.layerCount = _layerCount;
 
 		if (vkCreateImageView(_logicalDevice, &imageViewCreateInfo, nullptr, &_imageView) != VK_SUCCESS)
 		{
@@ -117,7 +117,6 @@ namespace Silverlight
 
 	void VulkanUtils::CreateBuffer(const VkDevice& _logicalDevice, const VkPhysicalDevice& _gpu, const uint64 _size, const uint32 _usage, const uint32 _memoryPropertyFlags, VkBuffer& _buffer, VkDeviceMemory& _bufferMemory)
 	{
-		// Create buffer object
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.size = _size;
@@ -126,10 +125,9 @@ namespace Silverlight
 
 		if (vkCreateBuffer(_logicalDevice, &bufferCreateInfo, nullptr, &_buffer) != VK_SUCCESS)
 		{
-			throw std::runtime_error("ERROR: Failed to create a vertex buffer");
+			throw std::runtime_error("ERROR: Failed to create a Vulkan buffer object");
 		}
 
-		// Allocate memory for the buffer
 		VkMemoryRequirements memRequirements{};
 		vkGetBufferMemoryRequirements(_logicalDevice, _buffer, &memRequirements);
 
@@ -140,23 +138,24 @@ namespace Silverlight
 
 		if (vkAllocateMemory(_logicalDevice, &allocInfo, nullptr, &_bufferMemory) != VK_SUCCESS)
 		{
-			throw std::runtime_error("ERROR: Failed to allocated memory for a vertex buffer");
+			throw std::runtime_error("ERROR: Failed to allocated memory for a Vulkan buffer object");
 		}
 
 		vkBindBufferMemory(_logicalDevice, _buffer, _bufferMemory, 0);
 	}
 
-	void VulkanUtils::CreateImage(const VkDevice& _logicalDevice, const VkPhysicalDevice& _gpu, const uint32 _w, const uint32 _h, const VkFormat _format, const VkImageTiling _tiling, const VkImageUsageFlagBits _usage, const uint32 _memoryPropertyFlags, VkImage& _image, VkDeviceMemory& _imageMemory)
+	void VulkanUtils::CreateImage(const VkDevice& _logicalDevice, const VkPhysicalDevice& _gpu, const uint32 _w, const uint32 _h, const VkFormat _format, const VkImageTiling _tiling, const VkImageUsageFlagBits _usage, const uint32 _memoryPropertyFlags, VkImage& _image, VkDeviceMemory& _imageMemory, const uint32 _arrayLayers, const uint32 _flags)
 	{
 		// Create image object
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageCreateInfo.flags = static_cast<VkImageCreateFlags>(_flags);
 		imageCreateInfo.extent.width = _w;
 		imageCreateInfo.extent.height = _h;
 		imageCreateInfo.extent.depth = 1;
 		imageCreateInfo.mipLevels = 1;
-		imageCreateInfo.arrayLayers = 1;
+		imageCreateInfo.arrayLayers = _arrayLayers;
 		imageCreateInfo.format = _format;
 		imageCreateInfo.tiling = _tiling;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -242,9 +241,9 @@ namespace Silverlight
 		return _format == VK_FORMAT_D32_SFLOAT_S8_UINT || _format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
 
-	void VulkanUtils::TransitionImageLayout(const VkDevice& _logicalDevice, const VkCommandPool& _commandPool, const VkQueue& _queue, VkImage& _image, const VkFormat _imageFormat, const VkImageLayout _oldLayout, const VkImageLayout _newLayout)
+	void VulkanUtils::TransitionImageLayout(const VkDevice& _logicalDevice, const VkCommandPool& _commandPool, const VkQueue& _queue, VkImage& _image, const VkFormat _imageFormat, const VkImageLayout _oldLayout, const VkImageLayout _newLayout, const uint32 _layerCount)
 	{
-		VkCommandBuffer cmdBuffer = BeginSingleTimeCommands(_logicalDevice, _commandPool, _queue);
+		VkCommandBuffer cmdBuffer{ BeginSingleTimeCommands(_logicalDevice, _commandPool, _queue) };
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -257,7 +256,7 @@ namespace Silverlight
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = 1;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = _layerCount;
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = 0;
 
@@ -312,7 +311,7 @@ namespace Silverlight
 		EndSingleTimeCommands(_logicalDevice, _commandPool, _queue, cmdBuffer);
 	}
 
-	void VulkanUtils::CopyBufferToImage(const VkDevice& _logicalDevice, const VkCommandPool& _commandPool, const VkQueue& _queue, const VkBuffer& _srcBuffer, const VkImage& _image, const uint32 _w, const uint32 _h) noexcept
+	void VulkanUtils::CopyBufferToImage(const VkDevice& _logicalDevice, const VkCommandPool& _commandPool, const VkQueue& _queue, const VkBuffer& _srcBuffer, const VkImage& _image, const uint32 _w, const uint32 _h, const uint32 _baseArrayLayer) noexcept
 	{
 		VkCommandBuffer cmdBuffer = BeginSingleTimeCommands(_logicalDevice, _commandPool, _queue);
 
@@ -323,7 +322,7 @@ namespace Silverlight
 
 		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.baseArrayLayer = _baseArrayLayer;
 		region.imageSubresource.layerCount = 1;
 
 		region.imageOffset = { 0, 0, 0 };

@@ -18,14 +18,14 @@ namespace Silverlight
 
 	std::vector<char> FileManager::ReadBinaryFile(std::string_view _fileName) const
 	{
-		auto shaderPath = PathManager::GetEngineAssetsPath() + _fileName.data();
-		std::ifstream inputFile(PathManager::GetEngineAssetsPath() + _fileName.data(), std::ios::binary | std::ios::ate);
+		auto shaderPath{ PathManager::GetRuntimeAssetsPath() + _fileName.data() };
+		std::ifstream inputFile(PathManager::GetRuntimeAssetsPath() + _fileName.data(), std::ios::binary | std::ios::ate);
 		if (!inputFile.is_open())
 		{
 			SE_LOG(LogCategory::Warning, "[FILEMANAGER]: Failed to read binary file: %s", _fileName.data());
 		}
 
-		const size_t fileSize = static_cast<size_t>(inputFile.tellg());
+		const size_t fileSize{ static_cast<size_t>(inputFile.tellg()) };
 		std::vector<char> buffer(fileSize);
 
 		inputFile.seekg(0);
@@ -37,7 +37,7 @@ namespace Silverlight
 	
 	std::ifstream FileManager::ReadFile(std::string_view _filePath) const
 	{
-		const std::string fullPath = PathManager::GetEngineAssetsPath() + _filePath.data();
+		const std::string fullPath{ PathManager::GetEngineAssetsPath() + _filePath.data() };
 		std::ifstream file(fullPath);
 
 		if (!file.is_open())

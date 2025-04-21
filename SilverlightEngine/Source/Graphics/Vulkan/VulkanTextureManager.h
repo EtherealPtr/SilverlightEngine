@@ -2,6 +2,8 @@
 
 #include "Foundation/Platform.h"
 #include <vector>
+#include <array>
+#include <string>
 
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 typedef struct VkDevice_T* VkDevice;
@@ -31,22 +33,24 @@ namespace Silverlight
 		VkDeviceMemory m_ImageMemory;
 	};
 
-	class VulkanTexture
+	class VulkanTextureManager
 	{
 	public:
-		VulkanTexture(const VulkanDevice& _device, const VkCommandPool& _commandPool);
-		~VulkanTexture();
+		VulkanTextureManager(const VulkanDevice& _device, const VkCommandPool& _commandPool);
+		~VulkanTextureManager();
 
-		VulkanTexture(const VulkanTexture&) = delete;
-		VulkanTexture& operator=(const VulkanTexture&) = delete;
-		VulkanTexture(VulkanTexture&&) = delete;
-		VulkanTexture& operator=(VulkanTexture&&) = delete;
+		VulkanTextureManager(const VulkanTextureManager&) = delete;
+		VulkanTextureManager& operator=(const VulkanTextureManager&) = delete;
+		VulkanTextureManager(VulkanTextureManager&&) = delete;
+		VulkanTextureManager& operator=(VulkanTextureManager&&) = delete;
 
+		void CreateCubemap(const std::array<std::string, 6>& _filePaths);
 		const std::vector<VkImageView>& GetTextureImageViews() const noexcept { return m_TextureImageViews; }
 		const VkImageView& GetDummyDepthTexture();
+		const VkImageView& GetCubemapTexture() const noexcept { return m_CubemapImageView; }
 
 	private:
-		void CreateStagingBuffer(const uint64 _sizeOfBuffer, const unsigned char* _pixels, const uint32 _imgW, const uint32 _imgH);
+		void CreateStagingBuffer(const uint64 _sizeOfBuffer, const unsigned char* _pixels, VkBuffer& _buffer, VkDeviceMemory& _bufferMemory) const;
 		void CreateTextureImage(const VkBuffer& _buffer, const uint32 _imgW, const uint32 _imgH);
 		void UploadTextures();
 
@@ -59,5 +63,7 @@ namespace Silverlight
 		std::vector<VulkanImage> m_TextureImages;
 		std::vector<VkImageView> m_TextureImageViews;
 		VulkanImage m_DummyDepthImage;
+		VkImage m_CubemapImage;
+		VkImageView m_CubemapImageView;
 	};
 } // End of namespace

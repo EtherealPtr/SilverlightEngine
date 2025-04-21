@@ -10,8 +10,8 @@ layout (location = 5) in vec4 in_fragment_light_space_position;
 
 layout (location = 0) out vec4 out_frag_color;
 
-layout (set = 0, binding = 2) uniform texture2D textures[];
-layout (set = 0, binding = 3) uniform sampler texture_sampler;
+layout (set = 0, binding = 2) uniform texture2D u_Textures[];
+layout (set = 0, binding = 3) uniform sampler u_TextureSampler;
 
 layout (set = 0, binding = 1) uniform Material 
 {
@@ -140,7 +140,7 @@ void main()
 
     if (in_texture_index > 0) 
     {
-        vec4 texColor = texture(sampler2D(textures[in_texture_index], texture_sampler), in_vertex_texCoord);
+        vec4 texColor = texture(sampler2D(u_Textures[in_texture_index], u_TextureSampler), in_vertex_texCoord);
         baseColor = texColor * u_Material.diffuseColor;
     }
 

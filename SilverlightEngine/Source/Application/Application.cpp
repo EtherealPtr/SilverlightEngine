@@ -41,10 +41,14 @@ namespace Silverlight
 
 		while (!m_Window->ShouldWindowClose())
 		{
+			//timer.StartTimer();
 			timer.Update();
+
 			m_Window->PollEvents();
 			EntityManager::UpdateEntities(static_cast<float>(timer.GetDeltaTime()));
 			m_Renderer->DrawFrame(timer.GetDeltaTime());
+
+			//timer.StopTimer();
 		}
 	}
 } // End of namespace

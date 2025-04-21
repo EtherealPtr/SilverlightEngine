@@ -24,7 +24,7 @@ namespace Silverlight
 	class Entity
 	{
 	public:
-		SILVERLIGHT_ENGINE explicit Entity();
+		SILVERLIGHT_ENGINE Entity();
 		SILVERLIGHT_ENGINE ~Entity() noexcept = default;
 
 		SILVERLIGHT_ENGINE const uint32 GetUniqueId() const noexcept { return m_Id; }
