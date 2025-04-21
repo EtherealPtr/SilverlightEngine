@@ -72,7 +72,6 @@ namespace Silverlight
 		void SetModelMatrix(const glm::mat4& _modelMatrix) noexcept { m_Model = _modelMatrix; }
 		void SetDiffuseColor(const glm::vec4& _diffuseColor) noexcept { m_Material.SetDiffuseColor(_diffuseColor); }
 		void SetSpecularColor(const glm::vec4& _specularColor) noexcept { m_Material.SetSpecularColor(_specularColor); }
-		void SetShaderType(const ShaderTypeEnum _shaderType) noexcept { m_Material.SetShaderType(_shaderType); }
 
 		uint32 GetEntityId() const noexcept { return m_EntityId; }
 		uint32 GetMeshId() const noexcept { return m_MeshId; }

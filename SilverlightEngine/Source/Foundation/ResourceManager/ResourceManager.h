@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Foundation/Platform.h"
 #include "Foundation/ResourceManager/File/FileManager.h"
 #include "Foundation/ResourceManager/Image/ImageManager.h"
-#include <string>
+#include <string_view>
 #include <fstream>
 #include <vector>
 

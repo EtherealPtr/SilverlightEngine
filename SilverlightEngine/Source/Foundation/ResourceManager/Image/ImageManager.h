@@ -3,7 +3,7 @@
 #include "Foundation/Platform.h"
 #include "Foundation/ResourceManager/Image/Image.h"
 #include <vector>
-#include <string>
+#include <string_view>
 #include <functional>
 
 namespace Silverlight

@@ -11,6 +11,7 @@
 
 namespace Silverlight
 {
+	// Internal linkage
 	constexpr uint64 g_MaxEntities{ 512 };
 	constexpr std::array<DescriptorSetLayoutBinding, 7> g_SceneBindings
 	{ {

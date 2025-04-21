@@ -3,7 +3,7 @@
 #include "MeshComponent.h"
 #include "Graphics/PrimitiveShapeEnum.h"
 #include "Graphics/MeshData.h"
-#include <string>
+#include <string_view>
 
 namespace Silverlight
 {

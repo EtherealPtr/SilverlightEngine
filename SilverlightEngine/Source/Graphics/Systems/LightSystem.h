@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Graphics/Components/Light/LightComponent.h"
+#include "Graphics/Components/Light/DirectionalLightComponent.h"
 #include <array>
 #include <vector>
 #include <optional>
-#include "Graphics/Components/Light/LightComponent.h"
-#include "Graphics/Components/Light/DirectionalLightComponent.h"
+#include <memory>
 
 namespace Silverlight
 {

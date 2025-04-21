@@ -15,7 +15,6 @@ namespace Silverlight
 	{
 		_data.SetVertexBufferId(GetVertexBufferId());
 		_data.SetEntityId(GetOwner()->GetUniqueId());
-		_data.SetShaderType(GetShaderType());
 
 		if (m_TintColor.has_value())
 		{

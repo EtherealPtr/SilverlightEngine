@@ -51,7 +51,6 @@ namespace Silverlight
 				{
 					MeshData copiedSubMesh{ _subMesh };
 					copiedSubMesh.SetEntityId(modelMesh.get()->GetOwner()->GetUniqueId());
-					copiedSubMesh.SetShaderType(modelMesh.get()->GetShaderType());
 
 					if (modelMesh.get()->GetTintColor().has_value())
 					{
