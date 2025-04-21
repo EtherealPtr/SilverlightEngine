@@ -46,10 +46,3 @@ if (MSVC)
         COMMENT "Running CompileShaders.bat before build"
     )
 endif()
-
-add_custom_command(TARGET SilverlightEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/Assets/config.ini"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.ini"
-    COMMENT "Copying config.ini to runtime directory"
-)
