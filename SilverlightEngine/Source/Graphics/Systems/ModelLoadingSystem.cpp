@@ -36,10 +36,25 @@ namespace Silverlight
 		std::pair<std::vector<uint16>*, std::unordered_map<uint16, uint16>*> data{ &m_TextureIds, &m_TextureIdMap };
 
 		loader.SetImageLoader(LoadImageDataCallback, &data);
-		if (!loader.LoadBinaryFromFile(&model, &err, &warn, _meshComponent.GetModelPath().c_str()))
+
+		const std::string path{ _meshComponent.GetModelPath() };
+		const std::filesystem::path filePath{ path };
+		const std::string extension{ filePath.extension().string() };
+
+		bool success{ false };
+
+		if (extension == ".glb") 
 		{
-			SE_LOG(LogCategory::Error, "[MODEL LOADING SYSTEM]: Failed to load model: %s", err.c_str());
-			throw std::runtime_error("Failed to load model");
+			success = loader.LoadBinaryFromFile(&model, &err, &warn, path);
+		}
+		else if (extension == ".gltf") 
+		{
+			success = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+		}
+		else 
+		{
+			SE_LOG(LogCategory::Error, "[MODEL LOADING SYSTEM]: Unsupported file extension: %s", extension.c_str());
+			throw std::runtime_error("[ERROR]: Failed to load model");
 		}
 
 		LoadModel(model, _meshComponent, _vertices, _indices);
@@ -49,7 +64,7 @@ namespace Silverlight
 	{
 		for (size_t i = 0; i < _model.nodes.size(); ++i)
 		{
-			const tinygltf::Node& node{ _model.nodes[i] };
+			const tinygltf::Node& node{ _model.nodes.at(i) };
 			if (node.mesh < 0)
 			{
 				continue;
@@ -58,58 +73,85 @@ namespace Silverlight
 			glm::mat4 nodeTransform{ 1.0f };
 			GetNodeTransform(node, nodeTransform);
 
-			const tinygltf::Mesh& mesh{ _model.meshes[node.mesh] };
+			const tinygltf::Mesh& mesh{ _model.meshes.at(node.mesh) };
 			for (const auto& primitive : mesh.primitives)
 			{
-				Silverlight::MeshData meshData{};
-				meshData.SetModelMatrix(nodeTransform);
+				const auto posIt{ primitive.attributes.find("POSITION") };
 
-				const uint32 vertexOffset{ static_cast<uint32>(_vertices.size()) };
-				meshData.SetIndexOffset(static_cast<uint32>(_indices.size()));
-
-				// Load vertex data
-				const auto& positionsAccessor{ _model.accessors[primitive.attributes.find("POSITION")->second] };
-				const auto& textureAccessor{ _model.accessors[primitive.attributes.find("TEXCOORD_0")->second] };
-				const auto& normalAccessor{ _model.accessors[primitive.attributes.find("NORMAL")->second] };
-				const auto& positionsBufferView{ _model.bufferViews[positionsAccessor.bufferView] };
-				const auto& texCoordsBufferView{ _model.bufferViews[textureAccessor.bufferView] };
-				const auto& normalsBufferView{ _model.bufferViews[normalAccessor.bufferView] };
-				const auto& positionsBuffer{ _model.buffers[positionsBufferView.buffer] };
-				const auto& texCoordsBuffer{ _model.buffers[texCoordsBufferView.buffer] };
-				const auto& normalsBuffer{ _model.buffers[normalsBufferView.buffer] };
-				const float* positions{ reinterpret_cast<const float*>(&(positionsBuffer.data[positionsBufferView.byteOffset + positionsAccessor.byteOffset])) };
-				const float* texCoords{ reinterpret_cast<const float*>(&(texCoordsBuffer.data[texCoordsBufferView.byteOffset + textureAccessor.byteOffset])) };
-				const float* normals{ reinterpret_cast<const float*>(&(normalsBuffer.data[normalsBufferView.byteOffset + normalAccessor.byteOffset])) };
-
-				std::vector<Vertex> subMeshVertices(positionsAccessor.count);
-				for (size_t j = 0; j < positionsAccessor.count; ++j)
+				if (posIt == primitive.attributes.end())
 				{
-					subMeshVertices[j].m_Position = glm::vec3
+					continue;
+				}
+
+				const auto& positionsAccessor{ _model.accessors.at(posIt->second) };
+				const auto& positionsView{ _model.bufferViews.at(positionsAccessor.bufferView) };
+				const auto& positionsBuffer{ _model.buffers.at(positionsView.buffer) };
+				const float* positions{ reinterpret_cast<const float*>(&(positionsBuffer.data.at(positionsView.byteOffset + positionsAccessor.byteOffset))) };
+
+				const size_t vertexCount{ positionsAccessor.count };
+				if (vertexCount == 0)
+				{
+					continue;
+				}
+
+				std::vector<Vertex> meshVertices(vertexCount);
+
+				const float* normals{ nullptr };
+				const float* texCoords{ nullptr };
+
+				if (auto normalIt = primitive.attributes.find("NORMAL"); normalIt != primitive.attributes.end())
+				{
+					const auto& normalAccessor{ _model.accessors.at(normalIt->second) };
+					const auto& normalView{ _model.bufferViews.at(normalAccessor.bufferView) };
+					const auto& normalBuffer{ _model.buffers.at(normalView.buffer) };
+					normals = reinterpret_cast<const float*>(&(normalBuffer.data.at(normalView.byteOffset + normalAccessor.byteOffset)));
+				}
+
+				if (auto texIt = primitive.attributes.find("TEXCOORD_0"); texIt != primitive.attributes.end())
+				{
+					const auto& texAccessor{ _model.accessors.at(texIt->second) };
+					const auto& texView{ _model.bufferViews.at(texAccessor.bufferView) };
+					const auto& texBuffer{ _model.buffers.at(texView.buffer) };
+					texCoords = reinterpret_cast<const float*>(&(texBuffer.data.at(texView.byteOffset + texAccessor.byteOffset)));
+				}
+
+				for (size_t j = 0; j < vertexCount; ++j)
+				{
+					Vertex& v{ meshVertices[j] };
+
+					v.m_Position = glm::vec3
 					(
 						positions[j * 3 + 0],
 						positions[j * 3 + 1],
 						positions[j * 3 + 2]
 					);
-					subMeshVertices[j].m_TexCoord = glm::vec2
-					(
-						texCoords[j * 2 + 0],
-						texCoords[j * 2 + 1]
-					);
-					subMeshVertices[j].m_Normal = glm::vec3
+
+					v.m_Normal = normals ? glm::vec3
 					(
 						normals[j * 3 + 0],
 						normals[j * 3 + 1],
 						normals[j * 3 + 2]
-					);
+					) : glm::vec3(0.0f, 1.0f, 0.0f); 
+
+					v.m_TexCoord = texCoords ? glm::vec2
+					(
+						texCoords[j * 2 + 0],
+						texCoords[j * 2 + 1]
+					) : glm::vec2(0.0f);
 				}
 
-				_vertices.insert(_vertices.end(), subMeshVertices.begin(), subMeshVertices.end());
+				Silverlight::MeshData meshData{};
+				meshData.SetModelMatrix(nodeTransform);
+				const uint32 vertexOffset{ static_cast<uint32>(_vertices.size()) };
+				meshData.SetIndexOffset(static_cast<uint32>(_indices.size()));
 
-				// Load index data
-				const auto& indicesAccessor{ _model.accessors[primitive.indices] };
-				const auto& indicesBufferView{ _model.bufferViews[indicesAccessor.bufferView] };
-				const auto& indicesBuffer{ _model.buffers[indicesBufferView.buffer] };
-				const uint16* indices{ reinterpret_cast<const uint16*>(&(indicesBuffer.data[indicesBufferView.byteOffset + indicesAccessor.byteOffset])) };
+				_vertices.insert(_vertices.end(), meshVertices.begin(), meshVertices.end());
+
+				const auto& indicesAccessor{ _model.accessors.at(primitive.indices) };
+				const auto& indicesView{ _model.bufferViews.at(indicesAccessor.bufferView) };
+				const auto& indicesBuffer{ _model.buffers.at(indicesView.buffer) };
+
+				const uint16* indices{ reinterpret_cast<const uint16*>(&(indicesBuffer.data.at(indicesView.byteOffset + indicesAccessor.byteOffset))) };
 				std::vector<uint32> subMeshIndices(indicesAccessor.count);
 				for (size_t j = 0; j < indicesAccessor.count; ++j)
 				{
@@ -143,7 +185,7 @@ namespace Silverlight
 			// Node has TRS (Translation, Rotation, Scale)
 			if (_node.translation.size() == TRANSLATION_SIZE)
 			{
-				_outTransform = glm::translate(_outTransform, glm::vec3(_node.translation[0], _node.translation[1], _node.translation[2]));
+				_outTransform = glm::translate(_outTransform, glm::vec3(_node.translation.at(0), _node.translation.at(1), _node.translation.at(2)));
 			}
 
 			if (_node.rotation.size() == ROTATION_SIZE)
@@ -154,7 +196,7 @@ namespace Silverlight
 
 			if (_node.scale.size() == SCALE_SIZE)
 			{
-				_outTransform = glm::scale(_outTransform, glm::vec3(_node.scale[0], _node.scale[1], _node.scale[2]));
+				_outTransform = glm::scale(_outTransform, glm::vec3(_node.scale.at(0), _node.scale.at(1), _node.scale.at(2)));
 			}
 		}
 	}
@@ -166,17 +208,17 @@ namespace Silverlight
 			return;
 		}
 
-		const auto& tinyMaterial{ _model.materials[_primitive.material] };
+		const auto& tinyMaterial{ _model.materials.at(_primitive.material) };
 		if (tinyMaterial.values.find("baseColorFactor") != tinyMaterial.values.end())
 		{
 			const auto& colorFactor{ tinyMaterial.values.at("baseColorFactor").ColorFactor() };
-			_meshData.SetDiffuseColor(glm::vec4(colorFactor[0], colorFactor[1], colorFactor[2], 1.0f));
+			_meshData.SetDiffuseColor(glm::vec4(colorFactor.at(0), colorFactor.at(1), colorFactor.at(2), 1.0f));
 		}
 
 		if (tinyMaterial.values.find("baseColorTexture") != tinyMaterial.values.end())
 		{
 			const int tinyTextureIndex{ tinyMaterial.values.at("baseColorTexture").TextureIndex() };
-			const uint16 textureId{ m_TextureIdMap[tinyTextureIndex] };
+			const uint16 textureId{ m_TextureIdMap.at(tinyTextureIndex) };
 			_meshData.SetTexId(textureId);
 		}
 	}
