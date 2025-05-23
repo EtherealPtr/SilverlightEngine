@@ -7,7 +7,7 @@ namespace Silverlight
 	Window::Window(const uint16 _width, const uint16 _height, const std::string_view _title) :
 		m_Window{ nullptr }
 	{
-		SE_LOG(LogCategory::Trace, "[WINDOW]: Creating window");
+		SE_LOG(LogCategory::Info, "[WINDOW]: Creating window");
 
 		if (!glfwInit())
 		{

@@ -9,7 +9,7 @@ namespace Silverlight
 		m_Surface{ VK_NULL_HANDLE },
 		m_VkInstance{ _instance }
 	{
-		SE_LOG(LogCategory::Trace, "[SURFACE]: Creating Vulkan surface");
+		SE_LOG(LogCategory::Info, "[SURFACE]: Creating Vulkan surface");
 
 		if (!_window)
 		{

@@ -52,13 +52,13 @@ namespace Silverlight
 
 		if (!image.m_Pixels)
 		{
-			SE_LOG(LogCategory::Error, "[RESOURCE]: Failed to load texture image %s", _pathToImage);
+			SE_LOG(LogCategory::Error, "[RESOURCE]: Failed to load texture image {}", _pathToImage);
 			throw std::runtime_error("ERROR: Failed to load texture image");
 		}
 
 		image.m_ImageIndex = static_cast<uint32>(m_Images.size());
 		m_OnImageLoaded(image);
-		SE_LOG(LogCategory::Trace, "[RESOURCE]: Loaded image %s", _pathToImage.data());
+		SE_LOG(LogCategory::Info, "[RESOURCE]: Loaded image {}", _pathToImage.data());
 
 		return image.m_ImageIndex;
 	}
@@ -79,7 +79,7 @@ namespace Silverlight
 
 		image.m_ImageIndex = static_cast<uint32>(m_Images.size());
 		m_OnImageLoaded(image);
-		SE_LOG(LogCategory::Trace, "[RESOURCE]: Loaded image from memory");
+		SE_LOG(LogCategory::Info, "[RESOURCE]: Loaded image from memory");
 
 		return image.m_ImageIndex;
 	}
@@ -94,6 +94,6 @@ namespace Silverlight
 			}
 		}
 
-		SE_LOG(LogCategory::Trace, "[RESOURCE]: Unloaded all image resources");
+		SE_LOG(LogCategory::Info, "[RESOURCE]: Unloaded all image resources");
 	}
 } // End of namespace

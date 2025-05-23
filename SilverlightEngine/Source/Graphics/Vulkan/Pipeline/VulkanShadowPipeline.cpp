@@ -20,7 +20,7 @@ namespace Silverlight
 
 	void VulkanShadowPipeline::CreatePipeline()
 	{
-		SE_LOG(LogCategory::Trace, "[GRAPHICS PIPELINE]: Creating depth-only graphics pipeline");
+		SE_LOG(LogCategory::Info, "[GRAPHICS PIPELINE]: Creating depth-only graphics pipeline");
 
 		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/depth.vert.spv") };
 

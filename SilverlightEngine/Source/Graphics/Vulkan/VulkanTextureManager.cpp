@@ -158,7 +158,7 @@ namespace Silverlight
 
 		m_TextureImages.emplace_back(m_CubemapImage, m_CubemapImageView, cubemapImageMemory);
 		m_TextureImageViews.emplace_back(m_CubemapImageView);
-		SE_LOG(LogCategory::Info, "[TEXTURE CUBE]: Created a cubemap (total textures: %d)", m_TextureImages.size());
+		SE_LOG(LogCategory::Info, "[TEXTURE CUBE]: Created a cubemap (total textures: {})", m_TextureImages.size());
 	}
 
 	const VkImageView& VulkanTextureManager::GetDummyDepthTexture()
@@ -292,6 +292,6 @@ namespace Silverlight
 		VulkanUtils::CreateImageView(m_LogicalDevice, textureImage, m_TextureImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, textureImageView);
 		m_TextureImages.emplace_back(textureImage, textureImageView, textureImageMemory);
 		m_TextureImageViews.emplace_back(textureImageView);
-		SE_LOG(LogCategory::Info, "[TEXTURE]: Created texture image object (total textures: %d)", m_TextureImages.size());
+		SE_LOG(LogCategory::Info, "[TEXTURE]: Created texture image object (total textures: {})", m_TextureImages.size());
 	}
 } // End of namespace

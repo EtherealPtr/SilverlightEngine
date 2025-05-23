@@ -20,7 +20,7 @@ namespace Silverlight
 
 	void VulkanSkyboxPipeline::CreatePipeline()
 	{
-		SE_LOG(LogCategory::Trace, "[SKYBOX PIPELINE]: Creating skybox graphics pipeline");
+		SE_LOG(LogCategory::Info, "[SKYBOX PIPELINE]: Creating skybox graphics pipeline");
 
 		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/skybox.vert.spv") };
 		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/skybox.frag.spv") };

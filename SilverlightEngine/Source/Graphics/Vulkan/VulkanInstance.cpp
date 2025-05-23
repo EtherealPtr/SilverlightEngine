@@ -16,7 +16,7 @@ namespace Silverlight
 		m_Instance{ VK_NULL_HANDLE },
 		m_DebugMessenger{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[INSTANCE]: Creating Vulkan instance");
+		SE_LOG(LogCategory::Info, "[INSTANCE]: Creating Vulkan instance");
 
 		uint32 instanceVersion{ 0 };
 		vkEnumerateInstanceVersion(&instanceVersion);

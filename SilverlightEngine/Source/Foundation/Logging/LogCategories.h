@@ -6,8 +6,8 @@ namespace Silverlight
 {
 	enum class LogCategory : uint8
 	{
-		Trace,
 		Info,
+		Profile,
 		Warning,
 		Error
 	};

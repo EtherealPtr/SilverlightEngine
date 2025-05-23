@@ -9,7 +9,7 @@ namespace Silverlight
 		m_CommandPool{ _pool },
 		m_CommandBuffers{ _count, VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[COMMAND BUFFER]: Creating command buffer");
+		SE_LOG(LogCategory::Info, "[COMMAND BUFFER]: Creating command buffer");
 
 		VkCommandBufferAllocateInfo commandBufferAllocInfo{};
 		commandBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

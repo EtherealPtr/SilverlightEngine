@@ -53,7 +53,7 @@ namespace Silverlight
 		}
 		else 
 		{
-			SE_LOG(LogCategory::Error, "[MODEL LOADING SYSTEM]: Unsupported file extension: %s", extension.c_str());
+			SE_LOG(LogCategory::Error, "[MODEL LOADING SYSTEM]: Unsupported file extension: {}", extension.c_str());
 			throw std::runtime_error("[ERROR]: Failed to load model");
 		}
 

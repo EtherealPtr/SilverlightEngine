@@ -8,7 +8,7 @@ namespace Silverlight
 		m_LogicalDevice{ _logicalDevice },
 		m_Fences{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[FENCE]: Creating %d fences", _count);
+		SE_LOG(LogCategory::Info, "[FENCE]: Creating {} fences", _count);
 
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;

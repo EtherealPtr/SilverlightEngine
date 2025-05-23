@@ -66,11 +66,11 @@ namespace Silverlight
 
 		if (_surfaceCapabilities.maxImageCount > 0 && imageCount > _surfaceCapabilities.maxImageCount)
 		{
-			SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Picked image count of %d", _surfaceCapabilities.maxImageCount);
+			SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Picked image count of {}", _surfaceCapabilities.maxImageCount);
 			return _surfaceCapabilities.maxImageCount;
 		}
 
-		SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Picked image count of %d", imageCount);
+		SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Picked image count of {}", imageCount);
 		return imageCount;
 	}
 
@@ -112,7 +112,7 @@ namespace Silverlight
 
 	void VulkanSwapchain::CreateSwapchain(const uint32 _w, const uint32 _h)
 	{
-		SE_LOG(LogCategory::Trace, "[SWAPCHAIN]: Creating Vulkan Swapchain");
+		SE_LOG(LogCategory::Info, "[SWAPCHAIN]: Creating Vulkan Swapchain");
 
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_GPU, m_Surface, &surfaceCapabilities);

@@ -2,9 +2,9 @@
 
 #include "LogCategories.h"
 #include <string>
-#include <sstream>
 #include <fstream>
 #include <functional>
+#include <format>
 
 namespace Silverlight
 {
@@ -15,7 +15,7 @@ namespace Silverlight
 		~Logger();
 
 		template<typename... Args>
-		void PrintLog(const LogCategory _category, std::string_view _format, Args... _args) const;
+		void PrintLog(const LogCategory _category, std::format_string<Args...> _format, Args&&... _args) const;
 
 		Logger(const Logger&) = delete;
 		Logger& operator=(const Logger&) = delete;
@@ -34,25 +34,25 @@ namespace Silverlight
 	extern const Logger g_Logger; // Defined in Logger.cpp
 
 	template<typename... Args>
-	inline void Logger::PrintLog(const LogCategory _category, std::string_view _format, Args... _args) const
+	inline void Logger::PrintLog(const LogCategory _category, std::format_string<Args...> _format, Args&&... _args) const
 	{
-		std::ostringstream oss{};
 		std::string_view categoryText{};
-
 		constexpr std::string_view reset{ "\033[0m" };
-		constexpr std::string_view red{ "\033[31m" };
 		constexpr std::string_view green{ "\033[32m" };
+		constexpr std::string_view magenta{ "\033[35m" };
 		constexpr std::string_view yellow{ "\033[33m" };
+		constexpr std::string_view red{ "\033[31m" };
 		std::string_view color{ reset };
-	
+
 		switch (_category)
 		{
-		case LogCategory::Trace:
-			categoryText = "[TRACE]";
-			break;
 		case LogCategory::Info:
 			categoryText = "[INFO]";
 			color = green;
+			break;
+		case LogCategory::Profile:
+			categoryText = "[PROFILER]";
+			color = magenta;
 			break;
 		case LogCategory::Warning:
 			categoryText = "[WARNING]";
@@ -63,13 +63,10 @@ namespace Silverlight
 			color = red;
 			break;
 		}
-	
-		char buffer[1024]{};
-		snprintf(buffer, sizeof(buffer), _format.data(), _args...);
-		oss << categoryText << buffer;
 
-		const std::string outputLog{ oss.str() };
-		printf("%s%s\n", color.data(), outputLog.c_str());
+		auto formatted{ std::format(_format, std::forward<Args>(_args)...) };
+		auto outputLog{ std::format("{}{}", categoryText, formatted) };
+		std::printf("%s%s%s\n", color.data(), outputLog.c_str(), reset.data());
 		m_LogEvent(outputLog.c_str());
 	}
 

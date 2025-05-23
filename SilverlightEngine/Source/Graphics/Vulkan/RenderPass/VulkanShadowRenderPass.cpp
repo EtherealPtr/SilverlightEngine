@@ -14,7 +14,7 @@ namespace Silverlight
 
 	void VulkanShadowRenderPass::CreateRenderPass()
 	{
-		SE_LOG(LogCategory::Trace, "[RENDER PASS]: Creating depth-only render pass");
+		SE_LOG(LogCategory::Info, "[RENDER PASS]: Creating depth-only render pass");
 		
 		VkAttachmentDescription attachment{};
 		attachment.format = static_cast<VkFormat>(m_DepthFormat);

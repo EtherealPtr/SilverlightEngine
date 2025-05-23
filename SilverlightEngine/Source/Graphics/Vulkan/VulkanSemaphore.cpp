@@ -8,7 +8,7 @@ namespace Silverlight
 		m_LogicalDevice{ _logicalDevice },
 		m_Semaphores{ _count, { VK_NULL_HANDLE, VK_NULL_HANDLE } }
 	{
-		SE_LOG(LogCategory::Trace, "[SEMAPHORE]: Creating %d semaphores", _count);
+		SE_LOG(LogCategory::Info, "[SEMAPHORE]: Creating %d semaphores", _count);
 
 		m_Semaphores.resize(_count);
 

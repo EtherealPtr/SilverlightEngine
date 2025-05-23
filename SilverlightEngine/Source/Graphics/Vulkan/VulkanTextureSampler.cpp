@@ -10,7 +10,7 @@ namespace Silverlight
 		m_PhysicalDevice{ _device.GetPhysicalDevice() },
 		m_TextureSampler{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[SAMPLER]: Creating texture sampler");
+		SE_LOG(LogCategory::Info, "[SAMPLER]: Creating texture sampler");
 
 		VkSamplerCreateInfo samplerCreateInfo{};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

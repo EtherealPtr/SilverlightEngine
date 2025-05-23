@@ -22,7 +22,7 @@ namespace Silverlight
 		std::ifstream inputFile(PathManager::GetRuntimeAssetsPath() + _fileName.data(), std::ios::binary | std::ios::ate);
 		if (!inputFile.is_open())
 		{
-			SE_LOG(LogCategory::Warning, "[FILEMANAGER]: Failed to read binary file: %s", _fileName.data());
+			SE_LOG(LogCategory::Warning, "[FILEMANAGER]: Failed to read binary file: {}", _fileName.data());
 		}
 
 		const size_t fileSize{ static_cast<size_t>(inputFile.tellg()) };
@@ -42,7 +42,7 @@ namespace Silverlight
 
 		if (!file.is_open())
 		{
-			SE_LOG(LogCategory::Error, "[FILEMANAGER]: Failed to open file: %s", _filePath.data());
+			SE_LOG(LogCategory::Error, "[FILEMANAGER]: Failed to open file: {}", _filePath.data());
 		}
 
 		return file;

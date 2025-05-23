@@ -118,11 +118,11 @@ namespace Silverlight
 		{
 			Material* materialData{ (Material*)((uint64)m_MaterialDynamicBufferMemBlock.get() + (mesh.GetMeshId() * m_MaterialDynamicBufferMemAlignment)) };
 			*materialData = { mesh.GetMaterial().GetDiffuseColor(), mesh.GetMaterial().GetSpecularColor() };
+		}
 
-			for (size_t i = 0; i < m_DescriptorSets.size(); ++i)
-			{
-				m_UniformBuffers[UniformBufferType::Material].at(i).CopyData(m_MaterialDynamicBufferMemBlock.get());
-			}
+		for (size_t i = 0; i < m_DescriptorSets.size(); ++i)
+		{
+			m_UniformBuffers[UniformBufferType::Material].at(i).CopyData(m_MaterialDynamicBufferMemBlock.get());
 		}
 	}
 

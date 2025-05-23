@@ -25,7 +25,7 @@ namespace Silverlight
 
     void VulkanFramebuffer::CreateFramebuffer(const uint32 _w, const uint32 _h, const VkImageView& _colorImageView, const VkImageView& _depthImageView)
     {
-        SE_LOG(LogCategory::Trace, "[FRAMEBUFFER]: Creating framebuffer");
+        SE_LOG(LogCategory::Info, "[FRAMEBUFFER]: Creating framebuffer");
 
         std::vector<VkImageView> attachments{};
         attachments.reserve(2);

@@ -74,7 +74,7 @@ namespace Silverlight
 			return &vertexBuffer->second;
 		}
 		
-		SE_LOG(LogCategory::Error, "[VERTEX MANAGER]: Failed to find vertex buffer with id: %d", _bufferId);
+		SE_LOG(LogCategory::Error, "[VERTEX MANAGER]: Failed to find vertex buffer with id: {}", _bufferId);
 		return nullptr;
 	}
 } // End of namespace

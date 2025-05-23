@@ -9,7 +9,7 @@ namespace Silverlight
 		m_LogicalDevice{ _logicalDevice },
 		m_DescriptorPool{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[DESCRIPTOR POOL]: Creating descriptor pool");
+		SE_LOG(LogCategory::Info, "[DESCRIPTOR POOL]: Creating descriptor pool");
 
 		std::array<VkDescriptorPoolSize, 6> poolSizes =
 		{

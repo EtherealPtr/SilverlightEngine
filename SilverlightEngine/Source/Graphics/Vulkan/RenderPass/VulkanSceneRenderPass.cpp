@@ -15,7 +15,7 @@ namespace Silverlight
 
 	void VulkanSceneRenderPass::CreateRenderPass()
 	{
-		SE_LOG(LogCategory::Trace, "[RENDER PASS]: Creating scene render pass");
+		SE_LOG(LogCategory::Info, "[RENDER PASS]: Creating scene render pass");
 
 		std::array<VkAttachmentDescription, 2> attachments{};
 		std::array<VkAttachmentReference, 2> attachmentReferences{};

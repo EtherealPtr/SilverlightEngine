@@ -47,13 +47,13 @@ namespace Silverlight
 		m_Scene.SetSceneTextures(m_TextureManager.GetTextureImageViews(), m_TextureSampler.Get());
 		m_Scene.SetSceneCubemap(m_TextureManager.GetCubemapTexture(), m_CubemapSampler.Get());
 
-		SE_LOG(LogCategory::Trace, "[RENDERER]: Vulkan renderer initialized");
+		SE_LOG(LogCategory::Info, "[RENDERER]: Vulkan renderer initialized");
 	}
 
 	VulkanRenderer::~VulkanRenderer()
 	{
 		vkDeviceWaitIdle(m_RenderContext.GetDevice().GetLogicalDevice());
-		SE_LOG(LogCategory::Trace, "[RENDERER]: Vulkan renderer shutting down");
+		SE_LOG(LogCategory::Info, "[RENDERER]: Vulkan renderer shutting down");
 	}
 
 	void VulkanRenderer::LoadDefaultCubemap()

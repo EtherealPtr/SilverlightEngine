@@ -2,17 +2,18 @@
 
 #include "Foundation/Platform.h"
 #include <chrono>
+#include <string_view>
 
 namespace Silverlight
 {
 	class Timer
 	{
 	public:
-		Timer() noexcept;
+		Timer(std::string_view _funcName = "") noexcept;
+		~Timer() noexcept;
 
 		void Update();
-		void StartTimer() noexcept;
-		void StopTimer();
+		void ResetTimer() noexcept;
 		double GetDeltaTime() const noexcept { return m_DeltaTime; }
 
 		Timer(const Timer&) = delete;
@@ -23,6 +24,7 @@ namespace Silverlight
 	private:
 		using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 
+		std::string_view m_StringView;
 		TimePoint m_LastTime;
 		TimePoint m_StartTime;
 		double m_DeltaTime;

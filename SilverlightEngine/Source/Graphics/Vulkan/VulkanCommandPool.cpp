@@ -8,7 +8,7 @@ namespace Silverlight
 		m_LogicalDevice{ _logicalDevice },
 		m_CommandPool{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[COMMAND POOL]: Creating command pool");
+		SE_LOG(LogCategory::Info, "[COMMAND POOL]: Creating command pool");
 
 		VkCommandPoolCreateInfo poolCreateInfo{};
 		poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

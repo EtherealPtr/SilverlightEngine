@@ -16,7 +16,7 @@ namespace Silverlight
 		m_TransferQueue{ VK_NULL_HANDLE },
 		m_PresentQueue{ VK_NULL_HANDLE }
 	{
-		SE_LOG(LogCategory::Trace, "[DEVICE]: Creating logical device");
+		SE_LOG(LogCategory::Info, "[DEVICE]: Creating logical device");
 
 		PickPhysicalDevice(_vkInstance);
 		SetupQueueFamilyIndices();
@@ -56,7 +56,7 @@ namespace Silverlight
 			}
 
 			const uint32 deviceScore{ RateDeviceSuitability(gpu, deviceProperties) };
-			SE_LOG(LogCategory::Trace, "[DEVICE]: Assigned score of %d for device with name %s", deviceScore, deviceProperties.deviceName);
+			SE_LOG(LogCategory::Info, "[DEVICE]: Assigned score of {} for device with name {}", deviceScore, deviceProperties.deviceName);
 
 			if (deviceScore > maxScore)
 			{
@@ -71,7 +71,7 @@ namespace Silverlight
 			throw std::runtime_error("ERROR: Failed to pick a suitable GPU\n");
 		}
 
-		SE_LOG(LogCategory::Info, "[DEVICE]: Selected GPU: %s", preferredDeviceName.data());
+		SE_LOG(LogCategory::Info, "[DEVICE]: Selected GPU: {}", preferredDeviceName.data());
 	}
 
 	uint32 VulkanDevice::RateDeviceSuitability(const VkPhysicalDevice& _gpu, const VkPhysicalDeviceProperties& _deviceProperties)

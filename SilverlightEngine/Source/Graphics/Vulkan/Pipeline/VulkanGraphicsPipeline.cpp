@@ -20,7 +20,7 @@ namespace Silverlight
 
 	void VulkanGraphicsPipeline::CreatePipeline()
 	{
-		SE_LOG(LogCategory::Trace, "[GRAPHICS PIPELINE]: Creating default graphics pipeline");
+		SE_LOG(LogCategory::Info, "[GRAPHICS PIPELINE]: Creating default graphics pipeline");
 
 		const auto vertShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.vert.spv") };
 		const auto fragShaderBinary{ g_ResourceManager.ReadBinaryFile("Shaders/standard.frag.spv") };

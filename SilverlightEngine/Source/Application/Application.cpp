@@ -12,14 +12,14 @@ namespace Silverlight
 		m_Window{ nullptr },
 		m_Renderer{ nullptr }
 	{
-		SE_LOG(LogCategory::Trace, "[APPLICATION]: Initializing...");
+		SE_LOG(LogCategory::Info, "[APPLICATION]: Initializing...");
 		const EngineConfig configSettings{ INIParser::ParseConfigSettings("config.ini") };
 		m_Window = std::make_unique<Window>(configSettings.m_WindowWidth, configSettings.m_WindowHeight, configSettings.m_WindowTitle);
 	}
 
 	Application::~Application()
 	{
-		SE_LOG(LogCategory::Trace, "[APPLICATION]: Terminating");
+		SE_LOG(LogCategory::Info, "[APPLICATION]: Terminating");
 	}
 
 	void Application::PostClientInitialize()
@@ -30,25 +30,22 @@ namespace Silverlight
 		}
 		catch (const std::exception& _problem)
 		{
-			SE_LOG(LogCategory::Error, "[APPLICATION]: Failed to initialize VulkanRenderer: %s", _problem.what());
+			SE_LOG(LogCategory::Error, "[APPLICATION]: Failed to initialize VulkanRenderer: {}", _problem.what());
 		}
 	}
 
 	void Application::Run() const
 	{
 		Timer timer{};
-		SE_LOG(LogCategory::Trace, "[APPLICATION]: Run");
+		SE_LOG(LogCategory::Info, "[APPLICATION]: Run");
 
 		while (!m_Window->ShouldWindowClose())
 		{
-			//timer.StartTimer();
 			timer.Update();
 
 			m_Window->PollEvents();
 			EntityManager::UpdateEntities(static_cast<float>(timer.GetDeltaTime()));
 			m_Renderer->DrawFrame(timer.GetDeltaTime());
-
-			//timer.StopTimer();
 		}
 	}
 } // End of namespace
