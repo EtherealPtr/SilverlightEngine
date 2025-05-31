@@ -48,8 +48,8 @@ public:
 };
 ```
 <img src="https://github.com/user-attachments/assets/265f177e-e9b7-43a0-ba75-e72f5e5651bb" alt="image" width="400"/>
-<p>Et voilà! Just like that. Magic! Just attach a mesh component to your entity and you're good to go. </p>
-<p>Want your object to move around? Attach a <code>TransformComponent</code> then override the <code>Update</code> method to add your logic. Example:</p>
+<p>Et voilà! Just like that. Magic! Simply attach a mesh component to your entity and you're good to go. </p>
+<p>Want your object to move around? Attach a <code>TransformComponent</code> then override the <code>Update</code> method to add your own custom logic. Example:</p>
 
 ```cpp
 class Teapot : public Silverlight::Entity
@@ -84,4 +84,4 @@ private:
 </ul>
 
 <h1>Why Silverlight Engine?</h1>
-<p>This is a passion project I've been developing in my free time. My goal is to create a powerful and robust rendering engine that uses the Vulkan API while providing a simple and user-friendly interface. There's still a long way to go, but I'm overall satisfied with the current state of the project. I set this challenge for myself to deepen my understanding of complex engine architecture and modern low-level rendering with Vulkan, as well as to explore new C++ features and enhance my C++ skills. The engine can be used as a visualization, simulation, or a prototyping tool, or it can serve as an educational tool for developers interested in learning about engine architecture and Vulkan rendering.</p>
+<p>This is a passion project that I've been developing on and off in my free time. It started with me learning how to render a simple triangle with Vulkan, then I turned it into a fully functional rendering engine featuring dynamic shadows, model loading capabilities, and an intuitive interface to render with Vulkan. Currently, the engine can be used as a visualization, simulation, or a prototyping tool. Additionally, it serves as an educational resource for engineers interested in learning about engine architecture and Vulkan rendering.</p>
