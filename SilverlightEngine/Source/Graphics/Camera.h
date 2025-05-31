@@ -43,5 +43,6 @@ namespace Silverlight
 		float m_Pitch;
 		ViewProjMatrix m_ViewProjMatrix;
 		KeyboardMouseInput m_InputDevice;
+		bool m_CursorLocked;
 	};
 } // End of namespace

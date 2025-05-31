@@ -17,7 +17,8 @@ namespace Silverlight
 		m_Yaw{ -90.0f },
 		m_Pitch{ 0.0f },
 		m_ViewProjMatrix{},
-		m_InputDevice{ _wnd }
+		m_InputDevice{ _wnd },
+		m_CursorLocked{ false }
 	{
 		UpdateViewMatrix();
 		UpdateProjectionMatrix();
@@ -27,7 +28,6 @@ namespace Silverlight
 	{
 		ProcessKeyboardInput(_deltaTime);
 		ProcessMouseInput(_deltaTime);
-		m_InputDevice.UpdateMousePosition();
 	}
 
 	void Camera::ProcessKeyboardInput(const double _deltaTime)
@@ -57,19 +57,39 @@ namespace Silverlight
 
 	void Camera::ProcessMouseInput(const double _deltaTime)
 	{
-		double xoffset{ m_InputDevice.GetXChange() };
-		double yoffset{ m_InputDevice.GetYChange() };
+		if (m_InputDevice.IsButtonPressed(SE_MOUSE_BUTTON_1))
+		{
+			if (!m_CursorLocked)
+			{
+				m_InputDevice.LockCursor();
+				m_InputDevice.ResetMouseDelta();
+				m_CursorLocked = true;
+			}
 
-		constexpr double baseSensitivity{ 25.0 };
-		const double sensitivity{ baseSensitivity * _deltaTime };
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
+			m_InputDevice.UpdateMousePosition();
+			double xChange{ m_InputDevice.GetXChange() };
+			double yChange{ m_InputDevice.GetYChange() };
 
-		m_Yaw += static_cast<float>(xoffset);
-		m_Pitch -= static_cast<float>(yoffset);
-		m_Pitch = std::clamp(m_Pitch, -89.0f, 89.0f);
+			const double baseSensitivity{ 5.0 };
+			const double sensitivity{ baseSensitivity * _deltaTime };
 
-		UpdateViewMatrix();
+			xChange *= sensitivity;
+			yChange *= sensitivity;
+
+			m_Yaw += static_cast<float>(xChange);
+			m_Pitch -= static_cast<float>(yChange);
+			m_Pitch = std::clamp(m_Pitch, -89.0f, 89.0f);
+
+			UpdateViewMatrix();
+		}
+		else
+		{
+			if (m_CursorLocked)
+			{
+				m_InputDevice.UnlockCursor();
+				m_CursorLocked = false;
+			}
+		}
 	}
 
 	void Camera::UpdateViewMatrix()

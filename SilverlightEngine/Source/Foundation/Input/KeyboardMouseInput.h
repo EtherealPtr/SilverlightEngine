@@ -20,9 +20,9 @@ namespace Silverlight
 		void GetCursorPosition(double& _x, double& _y) const noexcept;
 		void UpdateKeyInputs();
 		void UpdateMousePosition();
-
-	private:
+		void UnlockCursor() noexcept;
 		void LockCursor() noexcept;
+		void ResetMouseDelta();
 
 	private:
 		GLFWwindow* m_Window;

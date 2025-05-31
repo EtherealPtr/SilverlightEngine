@@ -10,9 +10,7 @@ namespace Silverlight
 		m_MouseYChange{ 0.0 },
 		m_LastMouseX{ 0.0 },
 		m_LastMouseY{ 0.0 }
-	{
-		LockCursor();
-	}
+	{}
 
 	void KeyboardMouseInput::Update()
 	{
@@ -61,5 +59,24 @@ namespace Silverlight
 	void KeyboardMouseInput::LockCursor() noexcept
 	{
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	void KeyboardMouseInput::UnlockCursor() noexcept
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void KeyboardMouseInput::ResetMouseDelta()
+	{
+		double x{ 0.0 };
+		double y{ 0.0 };
+
+		GetCursorPosition(x, y);
+
+		m_LastMouseX = x;
+		m_LastMouseY = y;
+
+		m_MouseXChange = 0.0;
+		m_MouseYChange = 0.0;
 	}
 } // End of namespace
