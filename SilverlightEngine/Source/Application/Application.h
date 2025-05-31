@@ -20,7 +20,10 @@ namespace Silverlight
 		Application& operator=(Application&&) = delete;
 
 		SILVERLIGHT_ENGINE void PostClientInitialize();
-		SILVERLIGHT_ENGINE void Run() const;
+		SILVERLIGHT_ENGINE void Run();
+
+	private:
+		void ThrottleFrameRate(double frameStartTime, double targetFrameTimeMs);
 
 	private:
 		std::unique_ptr<Window> m_Window;

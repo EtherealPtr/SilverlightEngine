@@ -15,6 +15,7 @@ namespace Silverlight
 		void Update();
 		void ResetTimer() noexcept;
 		double GetDeltaTime() const noexcept { return m_DeltaTime; }
+		static double GetCurrentTimeMs() noexcept;
 
 		Timer(const Timer&) = delete;
 		void operator=(const Timer&) = delete;

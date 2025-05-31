@@ -34,4 +34,9 @@ namespace Silverlight
 	{
 		m_StartTime = std::chrono::steady_clock::now();
 	}
+
+	double Timer::GetCurrentTimeMs() noexcept
+	{
+		return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	}
 } // End of namespace
