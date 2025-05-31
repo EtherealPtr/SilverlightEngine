@@ -24,9 +24,11 @@ namespace Silverlight
 		m_Camera{ 80.0f, static_cast<float>(_window.GetFramebufferWidth()) / _window.GetFramebufferHeight(), 0.1f, 100.0f, _window.GetWindow() },
 		m_MeshSystem{ m_VertexBufferManager },
 		m_LightSystem{},
-		m_TransformationSystem{},
-		m_CurrentFrameIndex{ 0 }
+		m_TransformationSystem{}
 	{
+		m_ImagesInFlight.resize(m_RenderContext.GetSwapchain().GetImageViews().size());
+		m_MaxFramesInFlight = m_ImagesInFlight.size();
+
 		LoadDefaultCubemap();
 		InitializeGraphicsComponents();
 
@@ -87,20 +89,27 @@ namespace Silverlight
 
 	void VulkanRenderer::DrawFrame(const double _deltaTime)
 	{
-		uint32 imgIndex{ 0 };
+		static uint32 frameIndex{ 0 };
+		const uint32 swapchainImageCount{ static_cast<uint32>(m_RenderContext.GetSwapchain().GetImageViews().size()) };
 
-		m_InFlightFences.Wait(m_CurrentFrameIndex);
-
-		const VkDevice logicalDevice{ m_RenderContext.GetDevice().GetLogicalDevice() };
+		const VkDevice device{ m_RenderContext.GetDevice().GetLogicalDevice() };
 		const VkSwapchainKHR swapchain{ m_RenderContext.GetSwapchain().Get() };
-		const VkResult result{ vkAcquireNextImageKHR(logicalDevice, swapchain, UINT64_MAX, m_Semaphore.Get().at(m_CurrentFrameIndex).first, VK_NULL_HANDLE, &imgIndex) };
+
+		const VkSemaphore imageAvailableSemaphore{ m_Semaphore.Get().at(frameIndex).first };
+		const VkSemaphore renderFinishedSemaphore{ m_Semaphore.Get().at(frameIndex).second };
+		const VkFence inFlightFence{ m_InFlightFences.Get().at(frameIndex) };
+
+		vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+
+		uint32 imgIndex{ 0 };
+		const VkResult result{ vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imgIndex) };
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
-			vkDeviceWaitIdle(logicalDevice);
+			vkDeviceWaitIdle(device);
 
-			const uint32 newWidth{ (uint32)m_RenderContext.GetWindow().GetFramebufferWidth() };
-			const uint32 newHeight{ (uint32)m_RenderContext.GetWindow().GetFramebufferHeight() };
+			const uint32 newWidth = static_cast<uint32>(m_RenderContext.GetWindow().GetFramebufferWidth());
+			const uint32 newHeight = static_cast<uint32>(m_RenderContext.GetWindow().GetFramebufferHeight());
 
 			if (newWidth == 0 || newHeight == 0)
 			{
@@ -116,37 +125,40 @@ namespace Silverlight
 				m_Scene.SetSceneShadowMap(m_ShadowScene.value().GetDepthBuffer().GetImageView(), m_TextureSampler.Get());
 			}
 
-			vkResetCommandPool(logicalDevice, m_CommandPool.Get(), 0);
+			m_ImagesInFlight.clear();
+			m_ImagesInFlight.resize(m_RenderContext.GetSwapchain().GetImageViews().size(), -1);
+
+			vkResetCommandPool(device, m_CommandPool.Get(), 0);
 			return;
 		}
 
-		m_InFlightFences.Reset(m_CurrentFrameIndex);
+		if (m_ImagesInFlight[imgIndex] != -1)
+		{
+			VkFence imageFence = m_InFlightFences.Get().at(m_ImagesInFlight[imgIndex]);
+			vkWaitForFences(device, 1, &imageFence, VK_TRUE, UINT64_MAX);
+		}
 
-		m_Camera.ProcessInput(_deltaTime);
+		m_ImagesInFlight[imgIndex] = frameIndex;
 
-		VkSemaphore waitSemaphore{ m_Semaphore.Get().at(m_CurrentFrameIndex).first };
-		VkSemaphore signalSemaphore{ m_Semaphore.Get().at(m_CurrentFrameIndex).second };
+		vkResetFences(device, 1, &inFlightFence);
 
 		VkCommandBuffer cmdBuffer{ m_CommandBuffers.Get().at(imgIndex) };
-
 		vkResetCommandBuffer(cmdBuffer, 0);
 		RecordRenderCommands(imgIndex);
 
-		m_CommandBuffers.Submit
-		(
+		m_CommandBuffers.Submit(
 			imgIndex,
 			m_RenderContext.GetDevice().GetGraphicsQueue(),
-			waitSemaphore,
-			signalSemaphore,
-			m_InFlightFences.Get().at(m_CurrentFrameIndex),
+			imageAvailableSemaphore,
+			renderFinishedSemaphore,
+			inFlightFence,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
 		);
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &signalSemaphore;
-
+		presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
 		VkSwapchainKHR swapchains[] = { swapchain };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapchains;
@@ -154,7 +166,8 @@ namespace Silverlight
 		presentInfo.pResults = nullptr;
 
 		vkQueuePresentKHR(m_RenderContext.GetDevice().GetPresentationQueue(), &presentInfo);
-		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_RenderContext.GetSwapchain().GetImageViews().size();
+
+		frameIndex = (frameIndex + 1) % m_MaxFramesInFlight;
 	}
 
 	void VulkanRenderer::RecordRenderCommands(const uint32 _imgIndex)

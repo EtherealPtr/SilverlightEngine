@@ -19,8 +19,8 @@ namespace Silverlight
 		VulkanFence(VulkanFence&&) = delete;
 		VulkanFence& operator=(VulkanFence&&) = delete;
 
-		void Wait(const uint16 _fenceIndex = 1) const noexcept;
-		void Reset(const uint16 _fenceIndex = 1) const noexcept;
+		void Wait(const uint16 _fenceIndex = 0) const noexcept;
+		void Reset(const uint16 _fenceIndex = 0) const noexcept;
 		const std::vector<VkFence>& Get() const noexcept { return m_Fences; }
 
 	private:

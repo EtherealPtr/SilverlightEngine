@@ -30,6 +30,7 @@ namespace Silverlight
 		VulkanRenderer& operator=(VulkanRenderer&&) = delete;
 
 		void DrawFrame(const double _deltaTime);
+		Camera& GetCamera() noexcept { return m_Camera; }
 
 	private:
 		void LoadDefaultCubemap();
@@ -55,9 +56,10 @@ namespace Silverlight
 		MeshSystem m_MeshSystem;
 		LightSystem m_LightSystem;
 		TransformationSystem m_TransformationSystem;
-		uint32 m_CurrentFrameIndex;
 		std::optional<VulkanSceneShadow> m_ShadowScene;
 		bool m_CastShadows;
 		uint32 m_CubemapMeshId;
+		std::vector<size_t> m_ImagesInFlight;
+		size_t m_MaxFramesInFlight;
 	};
 } // End of namespace
